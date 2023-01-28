@@ -1,0 +1,320 @@
+{
+  "status": 200,
+  "statusText": "OK",
+  "headers": [
+    [
+      "cache-control",
+      "no-cache, no-store, max-age=0, must-revalidate"
+    ],
+    [
+      "cngotdetailmark",
+      "cngotDetail"
+    ],
+    [
+      "content-type",
+      "application/json;charset=UTF-8"
+    ],
+    [
+      "date",
+      "Sat, 28 Jan 2023 21:56:45 GMT"
+    ],
+    [
+      "eagleeye-traceid",
+      "2101802316749430048691709ea9d5"
+    ],
+    [
+      "expires",
+      "0"
+    ],
+    [
+      "p3p",
+      "CP=\"CAO PSA OUR\""
+    ],
+    [
+      "pragma",
+      "no-cache"
+    ],
+    [
+      "server",
+      "Tengine"
+    ],
+    [
+      "set-cookie",
+      "xman_us_f=x_l=1&acs_rt=76dc911d47a649318439fa63abc0a4dc; Domain=.aliexpress.com; Expires=Fri, 16-Feb-2091 01:10:52 GMT; Path=/"
+    ],
+    [
+      "set-cookie",
+      "acs_usuc_t=x_csrf=1591d4oji61ga&acs_rt=76dc911d47a649318439fa63abc0a4dc; Domain=.aliexpress.com; Path=/"
+    ],
+    [
+      "set-cookie",
+      "xman_t=pug9Eal5k42FPXUhWvWJvkm0Cs9gjbu5uNIiaFOsctXwR70KWwTDiAlNOHYckbST; Domain=.aliexpress.com; Path=/; HttpOnly"
+    ],
+    [
+      "set-cookie",
+      "xman_f=LALfjxRyodGTRJYlNWpQkm1gU4OIWL6a1Lu7Opca/SkGp56LCZJE4eLM4BGagKATWEM3jI2bdtnfBq7rULN/E9/YXYDpNJu86ceGaFoNJEXMcoVaxFLgaw==; Domain=.aliexpress.com; Expires=Fri, 16-Feb-2091 01:10:52 GMT; Path=/; HttpOnly"
+    ],
+    [
+      "set-cookie",
+      "XSRF-TOKEN=4d8e4226-4572-4fe0-8b50-43cb835ac232; Path=/; HttpOnly"
+    ],
+    [
+      "strict-transport-security",
+      "max-age=31536000 ; includeSubDomains, max-age=31536000"
+    ],
+    [
+      "timing-allow-origin",
+      "*"
+    ],
+    [
+      "vary",
+      "Accept-Encoding"
+    ],
+    [
+      "x-application-context",
+      "cngot-detail:production:7001"
+    ],
+    [
+      "x-content-type-options",
+      "nosniff"
+    ],
+    [
+      "x-frame-options",
+      "DENY"
+    ],
+    [
+      "x-xss-protection",
+      "1; mode=block"
+    ]
+  ],
+  "body": {
+    "module": [
+      {
+        "mailNo": "AE010698498",
+        "originCountry": "Mainland China",
+        "destCountry": "Israel",
+        "status": "DELIVERING",
+        "statusDesc": "Delivering",
+        "mailNoSource": "AE",
+        "processInfo": {
+          "progressStatus": "NORMAL",
+          "progressRate": 0.625,
+          "type": "CROSS",
+          "progressPointList": [
+            {
+              "pointName": "Mainland China",
+              "light": true
+            },
+            {
+              "pointName": "Israel",
+              "light": true
+            },
+            {
+              "pointName": "Destination city",
+              "reload": true,
+              "light": true
+            },
+            {
+              "pointName": "Delivered"
+            }
+          ]
+        },
+        "latestTrace": {
+          "time": 1674796980000,
+          "timeStr": "2023-01-27 13:23:00",
+          "desc": "Arrived at linehual office",
+          "standerdDesc": "Arrived at linehual office",
+          "descTitle": "Carrier note:",
+          "timeZone": "GMT+2",
+          "actionCode": "LH_ARRIVE",
+          "group": {
+            "nodeCode": "AE_GROUP_LH_ARRIVE",
+            "nodeDesc": "In transit",
+            "currentIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN01l8BIMq1EODph4KRRA_!!6000000000341-2-tps-48-48.png",
+            "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0105wJp023L3Uvas9vZ_!!6000000007238-2-tps-48-48.png"
+          }
+        },
+        "detailList": [
+          {
+            "time": 1674796980000,
+            "timeStr": "2023-01-27 13:23:00",
+            "desc": "Arrived at linehual office",
+            "standerdDesc": "Arrived at linehual office",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+2",
+            "actionCode": "LH_ARRIVE",
+            "group": {
+              "nodeCode": "AE_GROUP_LH_ARRIVE",
+              "nodeDesc": "In transit",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN01l8BIMq1EODph4KRRA_!!6000000000341-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0105wJp023L3Uvas9vZ_!!6000000007238-2-tps-48-48.png"
+            }
+          },
+          {
+            "time": 1674746280000,
+            "timeStr": "2023-01-26 23:18:00",
+            "desc": "Left from departure country/region",
+            "standerdDesc": "Departed from departure country/region",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "LH_DEPART",
+            "group": {
+              "nodeCode": "AE_GROUP_LH_PROCESSING",
+              "nodeDesc": "In transit",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN01l8BIMq1EODph4KRRA_!!6000000000341-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0105wJp023L3Uvas9vZ_!!6000000007238-2-tps-48-48.png"
+            }
+          },
+          {
+            "time": 1674697620000,
+            "timeStr": "2023-01-26 09:47:00",
+            "desc": "Import clearance start",
+            "standerdDesc": "Import customs clearance started",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0",
+            "actionCode": "CC_IM_START",
+            "group": {
+              "nodeCode": "AE_GROUP_IM_CLEARING_CUSTOMS",
+              "nodeDesc": "At customs",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
+            }
+          },
+          {
+            "time": 1674691200000,
+            "timeStr": "2023-01-26 08:00:00",
+            "desc": "Leaving from departure country/region",
+            "standerdDesc": "Leaving from departure country/region",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "LH_HO_AIRLINE"
+          },
+          {
+            "time": 1674629742000,
+            "timeStr": "2023-01-25 14:55:42",
+            "desc": "Export clearance success",
+            "standerdDesc": "Export customs clearance complete",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "CC_EX_SUCCESS",
+            "group": {
+              "nodeCode": "AE_GROUP_EX_CLEARING_CUSTOMS",
+              "nodeDesc": "At customs",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
+            }
+          },
+          {
+            "time": 1674628519000,
+            "timeStr": "2023-01-25 14:35:19",
+            "desc": "Export customs clearance started",
+            "standerdDesc": "Export customs clearance started",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "CC_EX_START"
+          },
+          {
+            "time": 1674618638471,
+            "timeStr": "2023-01-25 11:50:38",
+            "desc": "preMainCode:SINOA00241668IL",
+            "standerdDesc": "Carrier update",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "TRANSIT_PORT_REROUTE_CALLBACK"
+          },
+          {
+            "time": 1674606315000,
+            "timeStr": "2023-01-25 08:25:15",
+            "desc": "Arrived at departure transport hub",
+            "standerdDesc": "Arrived at departure transport hub",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "LH_HO_IN_SUCCESS"
+          },
+          {
+            "time": 1674564875000,
+            "timeStr": "2023-01-24 20:54:35",
+            "desc": "Outbound in sorting center",
+            "standerdDesc": "[Shatian Town] Departed from sorting center",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "SC_OUTBOUND_SUCCESS",
+            "group": {
+              "nodeCode": "AE_GROUP_SC_PROCESSING",
+              "nodeDesc": "In transit",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i4/O1CN01MZ8JBd1yVWTLbfuHQ_!!6000000006584-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i1/O1CN01fPAIee1a5pTIgKnuB_!!6000000003279-2-tps-48-48.png"
+            }
+          },
+          {
+            "time": 1674562821000,
+            "timeStr": "2023-01-24 20:20:21",
+            "desc": "Accepted by carrier",
+            "standerdDesc": "Received by logistics company",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "PU_PICKUP_SUCCESS",
+            "group": {
+              "nodeCode": "AE_GROUP_PU_PROCESSING",
+              "nodeDesc": "In transit",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i4/O1CN01MZ8JBd1yVWTLbfuHQ_!!6000000006584-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i1/O1CN01fPAIee1a5pTIgKnuB_!!6000000003279-2-tps-48-48.png"
+            }
+          },
+          {
+            "time": 1674562821000,
+            "timeStr": "2023-01-24 20:20:21",
+            "desc": "Inbound in sorting center",
+            "standerdDesc": "[Shatian Town] Processing at sorting center",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+8",
+            "actionCode": "SC_INBOUND_SUCCESS"
+          },
+          {
+            "time": 1674531003862,
+            "timeStr": "2023-01-24 11:30:03",
+            "desc": "包裹已出库",
+            "standerdDesc": "Carrier update",
+            "descTitle": "Carrier note:",
+            "timeZone": "",
+            "actionCode": "WMS_CONFIRMED"
+          },
+          {
+            "time": 1674531003000,
+            "timeStr": "2023-01-24 11:30:03",
+            "desc": "Leave the warehouse",
+            "standerdDesc": "Package shipped out from warehouse",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0800",
+            "actionCode": "GWMS_OUTBOUND",
+            "group": {
+              "nodeCode": "AE_GROUP_WH_PROCESSING",
+              "nodeDesc": "Store processing the order",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i4/O1CN01mBYeeD1x5aQN6r5Xc_!!6000000006392-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i1/O1CN01zIP37V1cPBRLw5fvI_!!6000000003592-2-tps-48-50.png"
+            }
+          },
+          {
+            "time": 1674530788216,
+            "timeStr": "2023-01-24 11:26:28",
+            "desc": "Package finished",
+            "standerdDesc": "Package ready for shipping from warehouse",
+            "descTitle": "Carrier note:",
+            "timeZone": "",
+            "actionCode": "GWMS_PACKAGE"
+          },
+          {
+            "time": 1674496773895,
+            "timeStr": "2023-01-24 01:59:33",
+            "desc": "Order received successfully",
+            "standerdDesc": "Shipment information received by warehouse electronically",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0800",
+            "actionCode": "GWMS_ACCEPT"
+          }
+        ]
+      }
+    ],
+    "success": true
+  }
+}
