@@ -16,6 +16,7 @@ Deno.test("HTTP server", async (t) => {
     postalApiMap: {
       cainiao: new CainiaoApi(),
     },
+    now: () => new Date("2020-01-01T00:00:00.000Z"),
   });
   const server = new HttpServer({ postalService, port: 9000 });
 
@@ -38,7 +39,7 @@ Deno.test("HTTP server", async (t) => {
         assertEquals(resBody.length, 1);
         assertEquals(resBody[0].trackingNumber, "AE010698498");
         await assertSnapshot(t, resBody);
-      },
+      }
     );
   });
 });
