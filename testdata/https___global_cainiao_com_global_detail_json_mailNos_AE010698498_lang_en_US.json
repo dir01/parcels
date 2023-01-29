@@ -16,11 +16,11 @@
     ],
     [
       "date",
-      "Sat, 28 Jan 2023 21:56:45 GMT"
+      "Sun, 29 Jan 2023 12:02:23 GMT"
     ],
     [
       "eagleeye-traceid",
-      "2101802316749430048691709ea9d5"
+      "2101801616749937429393138e8314"
     ],
     [
       "expires",
@@ -40,23 +40,23 @@
     ],
     [
       "set-cookie",
-      "xman_us_f=x_l=1&acs_rt=76dc911d47a649318439fa63abc0a4dc; Domain=.aliexpress.com; Expires=Fri, 16-Feb-2091 01:10:52 GMT; Path=/"
+      "xman_us_f=x_l=1&acs_rt=0b40dc5bef3c4a27958d656eae801114; Domain=.aliexpress.com; Expires=Fri, 16-Feb-2091 15:16:30 GMT; Path=/"
     ],
     [
       "set-cookie",
-      "acs_usuc_t=x_csrf=1591d4oji61ga&acs_rt=76dc911d47a649318439fa63abc0a4dc; Domain=.aliexpress.com; Path=/"
+      "acs_usuc_t=x_csrf=yn0dy3pcscew&acs_rt=0b40dc5bef3c4a27958d656eae801114; Domain=.aliexpress.com; Path=/"
     ],
     [
       "set-cookie",
-      "xman_t=pug9Eal5k42FPXUhWvWJvkm0Cs9gjbu5uNIiaFOsctXwR70KWwTDiAlNOHYckbST; Domain=.aliexpress.com; Path=/; HttpOnly"
+      "xman_t=YQD02HgbtcQvrl7R92T+jI1SqvBGOuc7W8c+pRFEdquqlwtPTtG2Iyh0Ghc/hbJU; Domain=.aliexpress.com; Path=/; HttpOnly"
     ],
     [
       "set-cookie",
-      "xman_f=LALfjxRyodGTRJYlNWpQkm1gU4OIWL6a1Lu7Opca/SkGp56LCZJE4eLM4BGagKATWEM3jI2bdtnfBq7rULN/E9/YXYDpNJu86ceGaFoNJEXMcoVaxFLgaw==; Domain=.aliexpress.com; Expires=Fri, 16-Feb-2091 01:10:52 GMT; Path=/; HttpOnly"
+      "xman_f=LkJFGRcIQ1pQ+ec4FT1PEriqaEJJHCRbTOv+zBiMPeh23Jdy61yonBxuV0HU54njkSXnw3ceuPeQ7zMMF2UP0+banmxfF8W+iPL6vvqAZ3GgDF+du69DpA==; Domain=.aliexpress.com; Expires=Fri, 16-Feb-2091 15:16:30 GMT; Path=/; HttpOnly"
     ],
     [
       "set-cookie",
-      "XSRF-TOKEN=4d8e4226-4572-4fe0-8b50-43cb835ac232; Path=/; HttpOnly"
+      "XSRF-TOKEN=a4775950-ba5c-4f49-a79f-46cd19ebe33c; Path=/; HttpOnly"
     ],
     [
       "strict-transport-security",
@@ -93,12 +93,12 @@
         "mailNo": "AE010698498",
         "originCountry": "Mainland China",
         "destCountry": "Israel",
-        "status": "DELIVERING",
-        "statusDesc": "Delivering",
+        "status": "CLEAR_CUSTOMS",
+        "statusDesc": "In customs ",
         "mailNoSource": "AE",
         "processInfo": {
           "progressStatus": "NORMAL",
-          "progressRate": 0.625,
+          "progressRate": 0.41666666666666663,
           "type": "CROSS",
           "progressPointList": [
             {
@@ -111,8 +111,7 @@
             },
             {
               "pointName": "Destination city",
-              "reload": true,
-              "light": true
+              "reload": true
             },
             {
               "pointName": "Delivered"
@@ -120,21 +119,69 @@
           ]
         },
         "latestTrace": {
-          "time": 1674796980000,
-          "timeStr": "2023-01-27 13:23:00",
-          "desc": "Arrived at linehual office",
-          "standerdDesc": "Arrived at linehual office",
+          "time": 1674952260000,
+          "timeStr": "2023-01-29 08:31:00",
+          "desc": "Import customs clearance complete",
+          "standerdDesc": "Import customs clearance complete",
           "descTitle": "Carrier note:",
-          "timeZone": "GMT+2",
-          "actionCode": "LH_ARRIVE",
+          "timeZone": "GMT+0",
+          "actionCode": "CC_IM_SUCCESS",
           "group": {
-            "nodeCode": "AE_GROUP_LH_ARRIVE",
-            "nodeDesc": "In transit",
-            "currentIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN01l8BIMq1EODph4KRRA_!!6000000000341-2-tps-48-48.png",
-            "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0105wJp023L3Uvas9vZ_!!6000000007238-2-tps-48-48.png"
+            "nodeCode": "AE_GROUP_IM_CLEARING_CUSTOMS",
+            "nodeDesc": "At customs",
+            "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
+            "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
           }
         },
         "detailList": [
+          {
+            "time": 1674952260000,
+            "timeStr": "2023-01-29 08:31:00",
+            "desc": "Import customs clearance complete",
+            "standerdDesc": "Import customs clearance complete",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0",
+            "actionCode": "CC_IM_SUCCESS",
+            "group": {
+              "nodeCode": "AE_GROUP_IM_CLEARING_CUSTOMS",
+              "nodeDesc": "At customs",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
+            }
+          },
+          {
+            "time": 1674952260000,
+            "timeStr": "2023-01-29 08:31:00",
+            "desc": "Leaving customs",
+            "standerdDesc": "Departed from customs",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0",
+            "actionCode": "CC_HO_OUT_SUCCESS",
+            "group": {
+              "nodeCode": "AE_GROUP_EX_CLEARING_CUSTOMS",
+              "nodeDesc": "At customs",
+              "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
+              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
+            }
+          },
+          {
+            "time": 1674939600000,
+            "timeStr": "2023-01-29 05:00:00",
+            "desc": "Arrived at customs",
+            "standerdDesc": "Arrived at customs",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0",
+            "actionCode": "CC_HO_IN_SUCCESS"
+          },
+          {
+            "time": 1674939600000,
+            "timeStr": "2023-01-29 05:00:00",
+            "desc": "到达海关监管仓等待清关",
+            "standerdDesc": "Carrier update",
+            "descTitle": "Carrier note:",
+            "timeZone": "GMT+0",
+            "actionCode": "CUSTOMS_ARRIVED_IN_AREA_CALLBACK"
+          },
           {
             "time": 1674796980000,
             "timeStr": "2023-01-27 13:23:00",
@@ -172,13 +219,7 @@
             "standerdDesc": "Import customs clearance started",
             "descTitle": "Carrier note:",
             "timeZone": "GMT+0",
-            "actionCode": "CC_IM_START",
-            "group": {
-              "nodeCode": "AE_GROUP_IM_CLEARING_CUSTOMS",
-              "nodeDesc": "At customs",
-              "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
-              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
-            }
+            "actionCode": "CC_IM_START"
           },
           {
             "time": 1674691200000,
@@ -196,13 +237,7 @@
             "standerdDesc": "Export customs clearance complete",
             "descTitle": "Carrier note:",
             "timeZone": "GMT+8",
-            "actionCode": "CC_EX_SUCCESS",
-            "group": {
-              "nodeCode": "AE_GROUP_EX_CLEARING_CUSTOMS",
-              "nodeDesc": "At customs",
-              "currentIconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01J7ktUO1P3Zkm5WUx2_!!6000000001785-2-tps-48-48.png",
-              "historyIconUrl": "https://img.alicdn.com/imgextra/i2/O1CN0109QPvs1bB9hESPre0_!!6000000003426-2-tps-48-50.png"
-            }
+            "actionCode": "CC_EX_SUCCESS"
           },
           {
             "time": 1674628519000,

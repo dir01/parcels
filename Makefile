@@ -16,6 +16,9 @@ format:
 test:
 	deno test --allow-net --allow-env --allow-read --allow-write --trace-ops
 
+test-update:
+	deno test --allow-net --allow-env --allow-read --allow-write -- --update
+
 test-refetch:
 	FORCE_REFETCH=true deno test --allow-net --allow-env --allow-read --allow-write
 

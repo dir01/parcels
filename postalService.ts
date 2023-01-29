@@ -8,6 +8,32 @@ export type TrackingInfo = {
   fetchedAt: Date;
   originCountry: string;
   destinationCountry: string;
+  events: TrackingEvent[];
+};
+
+export type TrackingEvent = {
+  time: Date;
+  description: string;
+  code:
+    | "SHIPMENT_INFO_RECEIVED"
+    | "PACKAGING_COMPLETED"
+    | "DISPATCHED_FROM_WAREHOUSE"
+    | "WMS_CONFIRMED" // WMS = Warehouse Management System
+    | "ARRIVED_AT_SORTING_CENTER"
+    | "ACCEPTED_BY_CARRIER"
+    | "DEPARTED_FROM_SORTING_CENTER"
+    | "LH_HO_IN_SUCCESS" // Arrived at departure transport hub
+    | "TRANSIT_PORT_REROUTE_CALLBACK" //preMainCode:SINOA00241668IL TODO: What does this mean?
+    | "EXPORT_CUSTOMS_CLEARANCE_STARTED"
+    | "LH_HO_AIRLINE" // Leaving from departure country/region
+    | "IMPORT_CUSTOMS_CLEARANCE_STARTED"
+    | "IMPORT_CUSTOMS_CLEARANCE_SUCCESS"
+    | "DEPARTED_ORIGIN_COUNTRY"
+    | "ARRIVED_AT_LINEHAUL_OFFICE"
+    | "ARRIVED_AT_CUSTOMS"
+    | "DEPARTED_FROM_CUSTOMS"
+    | "EXPORT_CUSTOMS_CLEARANCE_SUCCESS"
+    | "UNKNOWN";
 };
 
 /**

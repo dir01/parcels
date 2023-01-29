@@ -1,4 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.173.0/testing/asserts.ts";
+import { assertSnapshot } from "https://deno.land/std@0.168.0/testing/snapshot.ts";
 import { mockFetch, unMockFetch } from "https://deno.land/x/metch@0.1.0/mod.ts";
 import HttpServer from "./httpServer.ts";
 import PostalService from "./postalService.ts";
@@ -36,6 +37,7 @@ Deno.test("HTTP server", async (t) => {
         assertEquals(resp.status, 200);
         assertEquals(resBody.length, 1);
         assertEquals(resBody[0].trackingNumber, "AE010698498");
+        await assertSnapshot(t, resBody);
       },
     );
   });
