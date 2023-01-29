@@ -23,7 +23,7 @@ test-refetch:
 	FORCE_REFETCH=true deno test --allow-net --allow-env --allow-read --allow-write
 
 test-coverage:
-	deno test --allow-net --allow-env --coverage=coverage
+	deno test --allow-net --allow-env  --allow-read --allow-write --coverage=coverage
 	deno coverage coverage --lcov > coverage.lcov
 	genhtml -o coverage-html coverage.lcov
 
