@@ -45,7 +45,7 @@ export type TrackingEvent = {
 export interface PostalApi {
   fetch(
     trackingNumber: string,
-    httpClient: typeof fetch
+    httpClient: typeof fetch,
   ): Promise<PostalApiResponse | null>;
 
   parse(rawResponse: PostalApiResponse): TrackingInfo | null;
@@ -119,7 +119,7 @@ export default class PostalService {
 
   private async getTrackingInfoFromApi(
     trackingNumber: string,
-    apiName: string
+    apiName: string,
   ): Promise<TrackingInfo | null> {
     const api = this.postalApiMap[apiName];
 

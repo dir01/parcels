@@ -1,5 +1,5 @@
 import PostalService from "./postalService.ts";
-import { serve } from "https://deno.land/std@0.174.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.175.0/http/server.ts";
 
 export default class HttpServer {
   private postalService: PostalService;
