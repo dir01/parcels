@@ -1,6 +1,6 @@
 FROM denoland/deno:alpine-1.30.0
 
-EXPOSE 9000
+EXPOSE 8080
 
 WORKDIR /app
 

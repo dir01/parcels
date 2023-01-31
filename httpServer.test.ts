@@ -18,7 +18,7 @@ Deno.test("HTTP server", async (t) => {
     },
     now: () => new Date("2020-01-01T00:00:00.000Z"),
   });
-  const server = new HttpServer({ postalService, port: 9000 });
+  const server = new HttpServer({ postalService, port: 8080 });
 
   async function sendRequest(trackingNumber: string) {
     const req = new Request("http://whatever/", {
