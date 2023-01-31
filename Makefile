@@ -7,7 +7,7 @@ vendor:
 	deno vendor main.ts *.test.ts --force
 
 bundle:
-	deno bundle main.ts bundle.js
+	deno bundle main.ts bundle.js --no-remote --import-map=vendor/import_map.json
 
 run-bundle:
 	deno run $(DENO_FLAGS) bundle.js

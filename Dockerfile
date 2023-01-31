@@ -1,10 +1,10 @@
-FROM denoland/deno:alpine-1.30.0
+FROM lukechannings/deno
 
 EXPOSE 8080
 
 WORKDIR /app
 
-RUN apk add --no-cache make
+RUN apt update && apt install -y make
 
 ADD . .
 
@@ -14,4 +14,6 @@ USER deno
 
 RUN make bundle
 
-CMD make run-bundle
+ENTRYPOINT []
+
+CMD ["make", "run-bundle"]
