@@ -4,7 +4,7 @@ run:
 	deno run $(DENO_FLAGS) main.ts
 
 vendor:
-	deno vendor main.ts *.test.ts --force
+	deno vendor main.ts *.test.ts https://deno.land/x/nessie@2.0.10/cli.ts --force
 
 bundle:
 	deno bundle main.ts bundle.js --no-remote --import-map=vendor/import_map.json
@@ -33,16 +33,15 @@ test-coverage:
 	genhtml -o coverage-html coverage.lcov  # brew install lcov
 
 new-migration:
-	deno run -A https://deno.land/x/nessie/cli.ts -c ./db/nessie.config.ts make:migration $(shell bash -c 'read -p "Enter migration name: " name; echo $$name')
+	deno run -A ./vendor/deno.land/x/nessie@2.0.10/cli.ts -c ./db/nessie.config.ts make:migration $(shell bash -c 'read -p "Enter migration name: " name; echo $$name')
 
 migrate:
-	deno run -A https://deno.land/x/nessie/cli.ts -c ./db/nessie.config.ts migrate
+	deno run -A ./vendor/deno.land/x/nessie@2.0.10/cli.ts -c ./db/nessie.config.ts migrate
 
 migrate-rollback:
-	deno run -A https://deno.land/x/nessie/cli.ts -c ./db/nessie.config.ts rollback
+	deno run -A ./vendor/deno.land/x/nessie@2.0.10/cli.ts -c ./db/nessie.config.ts rollback
 
 clean:
 	rm -rf coverage coverage.lcov coverage-html bundle.js
-
 
 .PHONY: run vendor bundle run-bundle lint format test test-update test-refetch test-coverage new-migration migrate migrate-rollback clean
