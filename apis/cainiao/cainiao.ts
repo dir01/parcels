@@ -42,9 +42,11 @@ export default class API implements PostalApi {
     );
     const responseBody = await resp.text();
     return {
+      id: 0,
       apiName: "cainiao",
       trackingNumber,
-      fetchedAt: new Date(),
+      firstFetchedAt: new Date(),
+      lastFetchedAt: new Date(),
       responseBody,
       status: "success",
     };
@@ -79,7 +81,7 @@ export default class API implements PostalApi {
     return {
       apiName: "cainiao",
       trackingNumber: rawResponse.trackingNumber,
-      fetchedAt: rawResponse.fetchedAt,
+      lastFetchedAt: rawResponse.lastFetchedAt,
       originCountry: module.originCountry,
       destinationCountry: module.destCountry,
       events: (module.detailList || [])

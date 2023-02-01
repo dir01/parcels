@@ -5,7 +5,7 @@
 export type TrackingInfo = {
   trackingNumber: string;
   apiName: string;
-  fetchedAt: Date;
+  lastFetchedAt: Date;
   originCountry: string;
   destinationCountry: string;
   events: TrackingEvent[];
@@ -58,9 +58,11 @@ export interface PostalApi {
  * to indicate the status of the response while exposing possible expected error types
  */
 export type PostalApiResponse = {
+  id: number; // db key
   trackingNumber: string;
   apiName: string;
-  fetchedAt: Date;
+  firstFetchedAt: Date;
+  lastFetchedAt: Date;
   responseBody: string;
   status: "success" | "rateLimited" | "notFound" | "error";
   error?: string;
@@ -83,6 +85,8 @@ export interface PostalApiResponseStorage {
     apiName: string;
     response: PostalApiResponse;
   }): Promise<void>;
+
+  updateLastFetchedAt(id: number, lastFetchedAt: Date): Promise<void>;
 }
 
 export default class PostalService {
@@ -139,17 +143,24 @@ export default class PostalService {
     if (fetchedResp === null) {
       return null;
     }
-    fetchedResp.fetchedAt = this.now();
 
-    if (storedResp && fetchedResp.responseBody !== storedResp.responseBody) {
+    const now = this.now();
+
+    if (!storedResp || storedResp.responseBody !== fetchedResp.responseBody) {
+      fetchedResp.firstFetchedAt = now;
+      fetchedResp.lastFetchedAt = now;
       await this.storage.append({
         trackingNumber,
         apiName,
         response: fetchedResp,
       });
+      return api.parse(fetchedResp);
+    } else if (storedResp) {
+      await this.storage.updateLastFetchedAt(storedResp.id, now);
+      return api.parse({ ...storedResp, lastFetchedAt: now });
+    } else {
+      return api.parse({ ...fetchedResp, lastFetchedAt: now });
     }
-
-    return api.parse(fetchedResp);
   }
 
   /*
@@ -157,8 +168,8 @@ export default class PostalService {
   In fact, they are often reused.
   To solve this, we discard any results that are older than a certain number of days.
   */
-  private isRelatedToOldPackage(stored: PostalApiResponse): boolean {
-    const diff = this.now().getTime() - stored.fetchedAt.getTime();
+  private isRelatedToOldPackage(resp: PostalApiResponse): boolean {
+    const diff = this.now().getTime() - resp.lastFetchedAt.getTime();
     const diffInDays = diff / 1000 / 60 / 60 / 24;
     return diffInDays > this.expiryDays;
   }
@@ -167,8 +178,8 @@ export default class PostalService {
    * If we have recently checked the tracking number, we don't need to check it again.
    * This is to avoid unnecessary calls to the API.
    */
-  private wasRecentlyFetched(info: PostalApiResponse): boolean {
-    const diff = this.now().getTime() - info.fetchedAt.getTime();
+  private wasRecentlyFetched(resp: PostalApiResponse): boolean {
+    const diff = this.now().getTime() - resp.lastFetchedAt.getTime();
     const diffInHours = diff / 1000 / 60 / 60;
     return diffInHours > this.hoursBetweenChecks;
   }

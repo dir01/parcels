@@ -20,18 +20,22 @@ export default class SQLitePostalApiResponseStorage
     apiName: string;
   }): Promise<PostalApiResponse | null> {
     const rows = this.db.queryEntries<{
+      id: number;
       api_name: string;
       tracking_number: string;
-      fetched_at: number;
+      first_fetched_at: number;
+      last_fetched_at: number;
       response_body: string;
       status: PostalApiResponse["status"];
       error?: string;
     }>(
       `
       SELECT
+        id,
         api_name,
         tracking_number,
-        fetched_at,
+        first_fetched_at,
+        last_fetched_at,
         response_body,
         status,
         error
@@ -39,7 +43,7 @@ export default class SQLitePostalApiResponseStorage
       WHERE
         api_name = :apiName
         AND tracking_number = :trackingNumber
-        ORDER BY fetched_at DESC
+        ORDER BY last_fetched_at DESC
         LIMIT 1
         `,
       { apiName, trackingNumber },
@@ -52,9 +56,11 @@ export default class SQLitePostalApiResponseStorage
     }
     const row = rows[0];
     return Promise.resolve({
+      id: row.id,
       apiName: row.api_name,
       trackingNumber: row.tracking_number,
-      fetchedAt: new Date(row.fetched_at),
+      firstFetchedAt: new Date(row.first_fetched_at),
+      lastFetchedAt: new Date(row.last_fetched_at),
       responseBody: row.response_body,
       status: row.status,
       error: row.error,
@@ -74,14 +80,16 @@ export default class SQLitePostalApiResponseStorage
       INSERT INTO postal_api_responses (
         api_name,
         tracking_number,
-        fetched_at,
+        first_fetched_at,
+        last_fetched_at,
         response_body,
         status,
         error
       ) VALUES (
         :apiName,
         :trackingNumber,
-        :fetchedAt,
+        :firstFetchedAt,
+        :lastFetchedAt,
         :responseBody,
         :status,
         :error
@@ -89,10 +97,26 @@ export default class SQLitePostalApiResponseStorage
     query.execute({
       apiName,
       trackingNumber,
-      fetchedAt: response.fetchedAt.getTime(),
+      firstFetchedAt: response.firstFetchedAt.getTime(),
+      lastFetchedAt: response.lastFetchedAt.getTime(),
       responseBody: response.responseBody,
       status: response.status,
       error: response.error,
+    });
+    return Promise.resolve();
+  }
+
+  updateLastFetchedAt(id: number, lastFetchedAt: Date): Promise<void> {
+    const query = this.db.prepareQuery(`
+      UPDATE postal_api_responses
+      SET
+        last_fetched_at = :lastFetchedAt,
+      WHERE
+        id = :id
+    `);
+    query.execute({
+      id,
+      lastFetchedAt: lastFetchedAt.getTime(),
     });
     return Promise.resolve();
   }
