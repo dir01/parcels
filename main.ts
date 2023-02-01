@@ -5,7 +5,20 @@ import SQLitePostalApiResponseStorage from "./storage.ts";
 import CainiaoApi from "./apis/cainiao/cainiao.ts";
 
 const dbPath = Deno.env.get("DB_PATH") || "./db/sqlite.db";
-const storage = new SQLitePostalApiResponseStorage({ db: new DB(dbPath) });
+let db: DB;
+
+while (true) {
+  try {
+    db = new DB(dbPath);
+    break;
+  } catch (e) {
+    console.error(e);
+    console.log("Retrying in 5 seconds...");
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  }
+}
+
+const storage = new SQLitePostalApiResponseStorage({ db });
 
 const cainiaoApi: PostalApi = new CainiaoApi();
 
