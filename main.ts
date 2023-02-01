@@ -6,15 +6,20 @@ import CainiaoApi from "./apis/cainiao/cainiao.ts";
 
 const dbPath = Deno.env.get("DB_PATH") || "./db/sqlite.db";
 let db: DB;
-
+let attmpts = 0;
 while (true) {
   try {
     db = new DB(dbPath);
     break;
   } catch (e) {
+    if (attmpts > 5) {
+      console.error("Failed to connect to database, exiting...");
+      Deno.exit(1);
+    }
     console.error(e);
     console.log("Retrying in 5 seconds...");
     await new Promise((resolve) => setTimeout(resolve, 5000));
+    attmpts++;
   }
 }
 
