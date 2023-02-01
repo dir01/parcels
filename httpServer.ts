@@ -11,7 +11,7 @@ export default class HttpServer {
   }
 
   serve() {
-    return serve(this.handleRequest, { port: this.port });
+    return serve(this.handleRequest.bind(this), { port: this.port });
   }
 
   async handleRequest(req: Request): Promise<Response> {
