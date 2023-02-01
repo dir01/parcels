@@ -10,8 +10,6 @@ ADD . .
 
 RUN chown -R deno:deno /app
 
-USER deno
-
 RUN make bundle
 
 ENTRYPOINT []
