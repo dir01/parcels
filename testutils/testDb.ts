@@ -1,8 +1,8 @@
-import { DB } from "https://deno.land/x/sqlite@v3.7.0/mod.ts";
+import { Database } from "https://deno.land/x/sqlite3@0.7.3/mod.ts";
 
 export function prepareTestDb() {
-  const db = new DB(":memory:");
-  db.execute(
+  const db = new Database(":memory:");
+  db.prepare(
     `
     CREATE TABLE postal_api_responses (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -13,8 +13,7 @@ export function prepareTestDb() {
       response_body TEXT NOT NULL,
       status TEXT NOT NULL,
       error TEXT
-    );
-    `,
-  );
+    );`,
+  ).run();
   return db;
 }

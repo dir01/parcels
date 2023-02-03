@@ -3,3 +3,5 @@ coverage
 coverage.lcov
 coverage-html
 db/sqlite.db
+db/*litestream/
+.env*

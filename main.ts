@@ -1,15 +1,15 @@
-import { DB } from "https://deno.land/x/sqlite@v3.7.0/mod.ts";
+import { Database } from "https://deno.land/x/sqlite3@0.7.3/mod.ts";
 import PostalService, { PostalApi } from "./postalService.ts";
 import HttpServer from "./httpServer.ts";
 import SQLitePostalApiResponseStorage from "./storage.ts";
 import CainiaoApi from "./apis/cainiao/cainiao.ts";
 
-const dbPath = Deno.env.get("DB_PATH") || "./db/sqlite.db";
-let db: DB;
+const dbPath = Deno.env.get("DB_PATH") || "./db/database.sqlite";
+let db: Database;
 let attmpts = 0;
 while (true) {
   try {
-    db = new DB(dbPath);
+    db = new Database(dbPath);
     break;
   } catch (e) {
     if (attmpts > 5) {
@@ -36,4 +36,5 @@ const postalService = new PostalService({
   },
 });
 
+postalService.startPolling();
 new HttpServer({ postalService, port: 8080 }).serve();

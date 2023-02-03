@@ -1,10 +1,10 @@
 import {
-  ClientSQLite,
+  ClientSQLite3,
   NessieConfig,
-} from "https://deno.land/x/nessie@2.0.10/mod.ts";
+} from "https://raw.githubusercontent.com/dir01/deno-nessie/main/mod.ts";
 
 const dbPath = Deno.env.get("DB_PATH") || "./db/sqlite.db";
-const client = new ClientSQLite(dbPath);
+const client = new ClientSQLite3(dbPath);
 
 const config: NessieConfig = {
   client,

@@ -1,14 +1,15 @@
-import { DB } from "https://deno.land/x/sqlite@v3.7.0/mod.ts";
+import { Database } from "https://deno.land/x/sqlite3@0.7.3/mod.ts";
 import {
   PostalApiResponse,
   PostalApiResponseStorage,
 } from "./postalService.ts";
 
 export default class SQLitePostalApiResponseStorage
-  implements PostalApiResponseStorage {
-  private db: DB;
+  implements PostalApiResponseStorage
+{
+  private db: Database;
 
-  constructor(opts: { db: DB }) {
+  constructor(opts: { db: Database }) {
     this.db = opts.db;
   }
 
@@ -19,17 +20,9 @@ export default class SQLitePostalApiResponseStorage
     trackingNumber: string;
     apiName: string;
   }): Promise<PostalApiResponse | null> {
-    const rows = this.db.queryEntries<{
-      id: number;
-      api_name: string;
-      tracking_number: string;
-      first_fetched_at: number;
-      last_fetched_at: number;
-      response_body: string;
-      status: PostalApiResponse["status"];
-      error?: string;
-    }>(
-      `
+    const rows = this.db
+      .prepare(
+        `
       SELECT
         id,
         api_name,
@@ -45,9 +38,18 @@ export default class SQLitePostalApiResponseStorage
         AND tracking_number = :trackingNumber
         ORDER BY last_fetched_at DESC
         LIMIT 1
-        `,
-      { apiName, trackingNumber },
-    );
+        `
+      )
+      .all<{
+        id: number;
+        api_name: string;
+        tracking_number: string;
+        first_fetched_at: number;
+        last_fetched_at: number;
+        response_body: string;
+        status: PostalApiResponse["status"];
+        error?: string;
+      }>({ apiName, trackingNumber });
     if (rows.length === 0) {
       return Promise.resolve(null);
     }
@@ -76,7 +78,9 @@ export default class SQLitePostalApiResponseStorage
     apiName: string;
     response: PostalApiResponse;
   }): Promise<void> {
-    const query = this.db.prepareQuery(`
+    const query = this.db
+      .prepare(
+        `
       INSERT INTO postal_api_responses (
         api_name,
         tracking_number,
@@ -93,31 +97,31 @@ export default class SQLitePostalApiResponseStorage
         :responseBody,
         :status,
         :error
-      )`);
-    query.execute({
-      apiName,
-      trackingNumber,
-      firstFetchedAt: response.firstFetchedAt.getTime(),
-      lastFetchedAt: response.lastFetchedAt.getTime(),
-      responseBody: response.responseBody,
-      status: response.status,
-      error: response.error,
-    });
+      )`
+      )
+      .run({
+        apiName,
+        trackingNumber,
+        firstFetchedAt: response.firstFetchedAt.getTime(),
+        lastFetchedAt: response.lastFetchedAt.getTime(),
+        responseBody: response.responseBody,
+        status: response.status,
+        error: response.error ?? null,
+      });
+
     return Promise.resolve();
   }
 
   updateLastFetchedAt(id: number, lastFetchedAt: Date): Promise<void> {
-    const query = this.db.prepareQuery(`
-      UPDATE postal_api_responses
-      SET
-        last_fetched_at = :lastFetchedAt,
-      WHERE
-        id = :id
-    `);
-    query.execute({
-      id,
-      lastFetchedAt: lastFetchedAt.getTime(),
-    });
+    this.db
+      .prepare(
+        `UPDATE postal_api_responses
+        SET
+          last_fetched_at = :lastFetchedAt,
+        WHERE
+          id = :id`
+      )
+      .run({ id, lastFetchedAt: lastFetchedAt.getTime() });
     return Promise.resolve();
   }
 }

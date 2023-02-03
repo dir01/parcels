@@ -110,6 +110,12 @@ export default class PostalService {
     this.now = opts.now || (() => new Date());
   }
 
+  startPolling() {
+    setInterval(() => {
+      this.poll();
+    }, 1000 * 60 * 60 * this.hoursBetweenChecks);
+  }
+
   async getTrackingInfo(trackingNumber: string): Promise<TrackingInfo[]> {
     const apiNames = Object.keys(this.postalApiMap); // TODO: smart filtering
 
@@ -119,6 +125,10 @@ export default class PostalService {
 
     const results = await Promise.all(promises);
     return results.filter((r) => r !== null) as TrackingInfo[];
+  }
+
+  private poll() {
+    console.log("Polling...");
   }
 
   private async getTrackingInfoFromApi(
