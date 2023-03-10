@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dir01/parcels/core"
+	"github.com/dir01/parcels/parcels_service"
 	"github.com/jmoiron/sqlx"
 	"github.com/rubenv/sql-migrate"
 )
 
 func TestStorage(t *testing.T) {
-	prepareTestSubject := func() core.Storage {
+	prepareTestSubject := func() parcels_service.Storage {
 		db := sqlx.MustConnect("sqlite3", ":memory:")
 		storage := NewStorage(db)
 		migrations := &migrate.FileMigrationSource{
@@ -28,14 +28,14 @@ func TestStorage(t *testing.T) {
 	t.Run("Insert and GetLatest", func(t *testing.T) {
 		storage := prepareTestSubject()
 
-		rawResp := &core.PostalApiResponse{
+		rawResp := &parcels_service.PostalApiResponse{
 			ID:             0,
 			TrackingNumber: "some-tracking-number",
 			ApiName:        "some-api-name",
 			FirstFetchedAt: time.Unix(1000, 0),
 			LastFetchedAt:  time.Unix(2000, 0),
 			ResponseBody:   []byte("some-response-body"),
-			Status:         core.StatusSuccess,
+			Status:         parcels_service.StatusSuccess,
 		}
 
 		if err := storage.Insert(context.TODO(), "some-tracking-number", "some-api-name", rawResp); err != nil {
@@ -76,14 +76,14 @@ func TestStorage(t *testing.T) {
 	t.Run("Insert, Update and GetLatest", func(t *testing.T) {
 		storage := prepareTestSubject()
 
-		rawResp := &core.PostalApiResponse{
+		rawResp := &parcels_service.PostalApiResponse{
 			ID:             1,
 			TrackingNumber: "some-tracking-number",
 			ApiName:        "some-api-name",
 			FirstFetchedAt: time.Unix(1000, 0),
 			LastFetchedAt:  time.Unix(2000, 0),
 			ResponseBody:   []byte("some-response-body"),
-			Status:         core.StatusSuccess,
+			Status:         parcels_service.StatusSuccess,
 		}
 
 		if err := storage.Insert(context.TODO(), "some-tracking-number", "some-api-name", rawResp); err != nil {
@@ -93,7 +93,7 @@ func TestStorage(t *testing.T) {
 		rawResp.FirstFetchedAt = time.Unix(2000, 0)
 		rawResp.LastFetchedAt = time.Unix(3000, 0)
 		rawResp.ResponseBody = []byte("some-updated-response-body")
-		rawResp.Status = core.StatusRateLimitExceeded
+		rawResp.Status = parcels_service.StatusRateLimitExceeded
 
 		if err := storage.Update(context.TODO(), rawResp); err != nil {
 			t.Fatalf("failed to update: %v", err)
@@ -137,7 +137,7 @@ func TestStorage(t *testing.T) {
 		ttlCtx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
 		defer cancel()
 
-		rawResp := &core.PostalApiResponse{ID: 1}
+		rawResp := &parcels_service.PostalApiResponse{ID: 1}
 
 		err := storage.Insert(ttlCtx, "some-tracking-number", "some-api-name", rawResp)
 		if err == nil {
@@ -167,7 +167,7 @@ func TestStorage(t *testing.T) {
 		ttlCtx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
 		defer cancel()
 
-		rawResp := &core.PostalApiResponse{ID: 1}
+		rawResp := &parcels_service.PostalApiResponse{ID: 1}
 
 		err := storage.Update(ttlCtx, rawResp)
 		if err == nil {

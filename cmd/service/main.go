@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/dir01/parcels/core"
-	"github.com/dir01/parcels/http_server"
-	"github.com/dir01/parcels/postal_apis/cainiao"
+	"github.com/dir01/parcels/external_postal_apis/cainiao"
+	"github.com/dir01/parcels/parcels_api"
+	"github.com/dir01/parcels/parcels_service"
 	"github.com/dir01/parcels/sqlite_storage"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -41,11 +41,11 @@ func main() {
 	db := sqlx.MustOpen("sqlite3", dbPath)
 	storage := sqlite_storage.NewStorage(db)
 
-	apiMap := map[string]core.PostalApi{
+	apiMap := map[string]parcels_service.PostalApi{
 		"cainiao": cainiao.New(),
 	}
 
-	service := core.NewService(
+	service := parcels_service.NewService(
 		apiMap,
 		storage,
 		okCheckInterval,
@@ -57,7 +57,7 @@ func main() {
 		time.Now,
 	)
 
-	httpServer := http_server.NewServer(service, logger)
+	httpServer := parcels_api.NewServer(service, logger)
 	listener, err := net.Listen("tcp", bindAddr)
 	if err != nil {
 		panic(err)

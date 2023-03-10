@@ -1,14 +1,14 @@
-package http_server
+package parcels_api
 
 import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/dir01/parcels/core"
+	"github.com/dir01/parcels/parcels_service"
 	"go.uber.org/zap"
 )
 
-func NewServer(parcelsService core.Service, logger *zap.Logger) *HttpServer {
+func NewServer(parcelsService parcels_service.Service, logger *zap.Logger) *HttpServer {
 	return &HttpServer{
 		parcelsService: parcelsService,
 		logger:         logger,
@@ -16,7 +16,7 @@ func NewServer(parcelsService core.Service, logger *zap.Logger) *HttpServer {
 }
 
 type HttpServer struct {
-	parcelsService core.Service
+	parcelsService parcels_service.Service
 	logger         *zap.Logger
 }
 
@@ -47,9 +47,9 @@ func (s *HttpServer) handleGetTrackingInfo(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var httpTrackingInfos []*HttpTrackingInfo
+	var httpTrackingInfos []*TrackingInfo
 	for _, t := range trackingInfos {
-		httpTrackingInfos = append(httpTrackingInfos, HttpTrackingInfo{}.FromBusinessStruct(t))
+		httpTrackingInfos = append(httpTrackingInfos, TrackingInfo{}.fromBusinessStruct(t))
 	}
 
 	if respBytes, err := json.Marshal(httpTrackingInfos); err != nil {
