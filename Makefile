@@ -1,54 +1,49 @@
-DENO_FLAGS = --unstable --no-remote --import-map=vendor/import_map.json
-DENO_PERMISSIONS = --allow-net --allow-env --allow-read --allow-write --allow-ffi
+help: # Show help for each of the Makefile recipes.
+	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
+.PHONY: help
 
-run:
-	deno run $(DENO_FLAGS) $(DENO_PERMISSIONS) main.ts
+run: # Run the servie (useful for local development)
+	DB_PATH=db/sqlite.db go run ./cmd/service
+.PHONY: run
 
-vendor:
-	deno vendor main.ts *.test.ts db/nessie.config.ts https://raw.githubusercontent.com/dir01/deno-nessie/main/cli.ts https://deno.land/x/nessie@2.0.10/mod.ts --force
+build: # Build the service binary
+	go build -o ./bin/service ./cmd/service
 
-bundle:
-	deno bundle main.ts bundle.js --unstable
+test: # Run unit tests
+	go test ./...
+.PHONY: test
 
-run-bundle:
-	deno run $(DENO_FLAGS) $(DENO_PERMISSIONS) bundle.js
+precommit: # Run all possible checks before committing
+	make generate
+	make format
+	make vendor
+	make tidy
+	make test
+.PHONY: precommit
 
-lint:
-	deno lint
+generate: # Generate auto-generated code
+	go generate ./...
 
-format:
-	deno fmt
+format: # Format the code
+	go fmt ./...
 
+vendor: # Cache dependencies from go.mod into vendor/ directoryk
+	go mod vendor
 
-RUN_TEST = deno test -A --unstable --trace-ops
+tidy: # Clean up unused dependencies from go.sum
+	go mod tidy
 
-test:
-	$(RUN_TEST)
+install-dev: # Install development dependencies
+	go install github.com/rubenv/sql-migrate/...@latest
 
-test-update:
-	$(RUN_TEST) -- --update
+new-migration: # Create a new migration
+	sql-migrate new -config ./db/dbconfig.yml $(shell bash -c 'read -p "Enter migration name: " name; echo $$name')
 
-test-refetch:
-	FORCE_REFETCH=true make test
+migrate: # Migrate the database to the latest version
+	sql-migrate up -config ./db/dbconfig.yml
+.PHONY: migrate
 
-test-coverage:
-	$(RUN_TEST) --coverage=coverage
-	deno coverage coverage --lcov > coverage.lcov
-	genhtml -o coverage-html coverage.lcov  # brew install lcov
+migrate-down: # Rollback the database one version down
+	sql-migrate down -config ./db/dbconfig.yml
+.PHONY: migrate-down
 
-
-MIGRATOR = deno run -A --unstable --no-remote --import-map=vendor/import_map.json https://raw.githubusercontent.com/dir01/deno-nessie/main/cli.ts -c ./db/nessie.config.ts
-
-new-migration:
-	$(MIGRATOR) make:migration $(shell bash -c 'read -p "Enter migration name: " name; echo $$name')
-
-migrate:
-	$(MIGRATOR) migrate
-
-migrate-rollback:
-	$(MIGRATOR) rollback
-
-clean:
-	rm -rf coverage coverage.lcov coverage-html bundle.js
-
-.PHONY: run vendor bundle run-bundle lint format test test-update test-refetch test-coverage new-migration migrate migrate-rollback clean

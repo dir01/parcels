@@ -1,17 +1,8 @@
-FROM lukechannings/deno
-
-EXPOSE 8080
+FROM golang:1.20-alpine3.17
+RUN apk add --no-cache make
 
 WORKDIR /app
-
-RUN apt update && apt install -y make
-
 ADD . .
+RUN make build
 
-RUN chown -R deno:deno /app
-
-RUN make bundle
-
-ENTRYPOINT []
-
-CMD ["make", "run-bundle"]
+CMD bin/service
