@@ -1,7 +1,7 @@
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/go-gorp/gorp/v3 v3.0.5
+# github.com/go-gorp/gorp/v3 v3.1.0
 ## explicit; go 1.18
 github.com/go-gorp/gorp/v3
 # github.com/gojuno/minimock/v3 v3.1.1
@@ -17,7 +17,7 @@ github.com/mattn/go-sqlite3
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/rubenv/sql-migrate v1.3.1
+# github.com/rubenv/sql-migrate v1.4.0
 ## explicit; go 1.16
 github.com/rubenv/sql-migrate
 github.com/rubenv/sql-migrate/sqlparse

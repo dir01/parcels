@@ -1,5 +1,5 @@
 .env*
-db/sqlite.db
+db/sqlite.db*
 db/*litestream
 litestream.yaml
 bin/*
