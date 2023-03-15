@@ -3,6 +3,7 @@ package sqlite_storage
 import (
 	"bytes"
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -143,7 +144,7 @@ func TestStorage(t *testing.T) {
 		if err == nil {
 			t.Fatalf("expected error, got nil")
 		}
-		if err != context.DeadlineExceeded {
+		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Fatalf("expected context deadline exceeded, got %v", err)
 		}
 	})
@@ -157,7 +158,7 @@ func TestStorage(t *testing.T) {
 		if err == nil {
 			t.Fatalf("expected error, got nil")
 		}
-		if err != context.DeadlineExceeded {
+		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Fatalf("expected context deadline exceeded, got %v", err)
 		}
 	})
@@ -173,7 +174,7 @@ func TestStorage(t *testing.T) {
 		if err == nil {
 			t.Fatalf("expected error, got nil")
 		}
-		if err != context.DeadlineExceeded {
+		if !errors.Is(err, context.DeadlineExceeded) {
 			t.Fatalf("expected context deadline exceeded, got %v", err)
 		}
 	})

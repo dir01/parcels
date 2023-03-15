@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dir01/parcels/parcels_service"
+	"github.com/hori-ryota/zaperr"
 	"go.uber.org/zap"
 )
 
@@ -36,7 +37,7 @@ func (s *HttpServer) handleGetTrackingInfo(w http.ResponseWriter, r *http.Reques
 
 	trackingInfos, err := s.parcelsService.GetTrackingInfo(r.Context(), trackingNumber)
 	if err != nil {
-		s.logger.Error("failed to get tracking info", zap.Error(err))
+		s.logger.Error("failed to get tracking info", zaperr.ToField(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"status":"error", "message":"internal server error"}`))
 		return

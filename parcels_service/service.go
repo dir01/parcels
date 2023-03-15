@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hori-ryota/zaperr"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 )
@@ -80,7 +81,7 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 	now := svc.now()
 	storedResponsesMap, err := svc.loadRawResponsesMap(ctx, trackingNumber)
 	if err != nil {
-		return nil, err
+		return nil, zaperr.Wrap(err, "loadRawResponsesMap")
 	}
 
 	apisToHit, isParcelDelivered, parsedResponsesMap := svc.analyzeStoredResponses(storedResponsesMap)
@@ -148,13 +149,13 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 func (svc *ServiceImpl) loadRawResponsesMap(ctx context.Context, trackingNumber string) (map[string]*PostalApiResponse, error) {
 	lastResponses, err := svc.storage.GetLatest(ctx, trackingNumber, svc.apiNames)
 	if err != nil {
-		return nil, err
+		return nil, zaperr.Wrap(err, "failed to get latest responses")
 	}
 	lastResponsesMap := make(map[string]*PostalApiResponse, len(lastResponses))
 	for _, resp := range lastResponses {
 		lastResponsesMap[resp.ApiName] = resp
 	}
-	return lastResponsesMap, err
+	return lastResponsesMap, nil
 }
 
 // analyzeStoredResponses goes through the last responses from all APIs
@@ -293,5 +294,4 @@ func (svc *ServiceImpl) parseApiResponse(resp *PostalApiResponse) (*TrackingInfo
 		return nil, fmt.Errorf("not parsing a response with a non-success status")
 	}
 	return svc.apiMap[resp.ApiName].Parse(resp)
-
 }
