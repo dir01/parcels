@@ -117,6 +117,7 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 		case fetched == nil:
 			// Stored response, was too fresh to fetch, no need to update, just return it
 			if parsed := getParsedResp(apiName, stored); parsed != nil {
+				parsed.LastFetchedAt = stored.LastFetchedAt
 				result = append(result, parsed)
 			}
 		case stored == nil || !bytes.Equal(stored.ResponseBody, fetched.ResponseBody):

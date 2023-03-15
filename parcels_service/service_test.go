@@ -2,6 +2,7 @@ package parcels_service_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 	"time"
 
@@ -104,7 +105,7 @@ func TestService(t *testing.T) {
 		}
 	})
 
-	t.Run("freshly fetched tracking number", func(t *testing.T) {
+	t.Run("stored tracking - ttl not expired", func(t *testing.T) {
 		callCtx := context.WithValue(context.Background(), "foo", "bar")
 		svc, storage, timeCh, api1 := prepareTestSubjects()
 		defer close(timeCh)
@@ -134,8 +135,14 @@ func TestService(t *testing.T) {
 		if len(tr) != 1 {
 			t.Fatalf("expected 1 tracking info, got %d", len(tr))
 		}
-		if tr[0] != parsedTrackingInfo {
-			t.Fatalf("expected tracking info to be %v, got %v", parsedTrackingInfo, tr[0])
+		expected := &parcels_service.TrackingInfo{
+			TrackingNumber: "123",
+			ApiName:        "api1",
+			LastFetchedAt:  now.Add(-(okCheckInterval / 2)),
+		}
+		if !reflect.DeepEqual(tr[0], expected) {
+			t.Fatalf("expected tracking info to be %v, got %v", expected, tr[0])
 		}
 	})
+
 }
