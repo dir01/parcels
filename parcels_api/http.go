@@ -6,6 +6,7 @@ import (
 
 	"github.com/dir01/parcels/parcels_service"
 	"github.com/hori-ryota/zaperr"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
@@ -24,6 +25,7 @@ type HttpServer struct {
 func (s *HttpServer) GetMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/trackingInfo/", s.handleGetTrackingInfo)
+	mux.HandleFunc("/metrics", promhttp.Handler().ServeHTTP)
 	return mux
 }
 
