@@ -17,8 +17,8 @@ func New() parcels_service.PostalApi {
 
 type Cainiao struct{}
 
-func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) *parcels_service.PostalApiResponse {
-	result := &parcels_service.PostalApiResponse{
+func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) parcels_service.PostalApiResponse {
+	result := parcels_service.PostalApiResponse{
 		TrackingNumber: trackingNumber,
 		ApiName:        "cainiao",
 	}
@@ -27,6 +27,19 @@ func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) *parcels_ser
 	resp, err := http.Get(url)
 	if err != nil {
 		result.Status = parcels_service.StatusUnknownError
+		return result
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		result.Status = parcels_service.StatusNotFound
+		return result
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		result.Status = parcels_service.StatusUnknownError
+		if bytes, err := io.ReadAll(resp.Body); err == nil {
+			result.ResponseBody = bytes
+		}
 		return result
 	}
 
@@ -42,7 +55,7 @@ func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) *parcels_ser
 	return result
 }
 
-func (c *Cainiao) Parse(rawResponse *parcels_service.PostalApiResponse) (*parcels_service.TrackingInfo, error) {
+func (c *Cainiao) Parse(rawResponse parcels_service.PostalApiResponse) (*parcels_service.TrackingInfo, error) {
 	var cainiaoResponse response
 	if err := json.Unmarshal(rawResponse.ResponseBody, &cainiaoResponse); err != nil {
 		return nil, err

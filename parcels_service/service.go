@@ -71,10 +71,10 @@ type Storage interface {
 // 1. How to fetch raw response from the postal service's API
 // 2. How to parse raw response into TrackingInfo
 type PostalApi interface {
-	// Fetch should not return error.
-	// If there is an error, it should be indicated in PostalApiResponse.Status
-	Fetch(ctx context.Context, trackingNumber string) *PostalApiResponse
-	Parse(rawResponse *PostalApiResponse) (*TrackingInfo, error)
+	// Fetch should not return error, and response should never be nil.
+	// Any error and missing response should be indicated in PostalApiResponse.Status
+	Fetch(ctx context.Context, trackingNumber string) PostalApiResponse
+	Parse(rawResponse PostalApiResponse) (*TrackingInfo, error)
 }
 
 func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]*TrackingInfo, error) {
@@ -96,7 +96,7 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 
 	// getParsedResp is a convenience function to get parsed response from the map
 	// or parse it if it's not there yet
-	getParsedResp := func(apiName string, rawResp *PostalApiResponse) *TrackingInfo {
+	getParsedResp := func(apiName string, rawResp PostalApiResponse) *TrackingInfo {
 		if parsed, exists := parsedResponsesMap[apiName]; exists {
 			return parsed
 		} else if parsed, err := svc.parseApiResponse(rawResp); err == nil {
@@ -106,37 +106,35 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 	}
 
 	for _, apiName := range svc.apiNames {
-		fetched := fetchedResponsesMap[apiName]
+		fetched, wasFetched := fetchedResponsesMap[apiName]
 		stored := storedResponsesMap[apiName]
 
-		if fetched == nil && stored == nil {
-			continue
-		}
-
 		switch {
-		case fetched == nil:
-			// Stored response, was too fresh to fetch, no need to update, just return it
-			if parsed := getParsedResp(apiName, stored); parsed != nil {
+		case stored != nil && !wasFetched:
+			// Stored response was found, but was too fresh to re-fetch, no need to update, just return it
+			if parsed := getParsedResp(apiName, *stored); parsed != nil { // we can dereference here because we know that stored != nil
 				parsed.LastFetchedAt = stored.LastFetchedAt
 				result = append(result, parsed)
 			}
 		case stored == nil || !bytes.Equal(stored.ResponseBody, fetched.ResponseBody):
-			// Something new, store it and return it
+			// Something new, store it and return it (but only if it's not an error)
 			fetched.FirstFetchedAt = now
 			fetched.LastFetchedAt = now
-			if err := svc.storage.Insert(ctx, trackingNumber, apiName, fetched); err != nil {
+			if err := svc.storage.Insert(ctx, trackingNumber, apiName, &fetched); err != nil {
 				// TODO: check for duplicate key error, find correct entry and update it
 			}
-			if parsed := getParsedResp(apiName, fetched); parsed != nil {
-				result = append(result, parsed)
+			if fetched.Status == StatusSuccess {
+				if parsed := getParsedResp(apiName, fetched); parsed != nil {
+					result = append(result, parsed)
+				}
 			}
-		default: // stored.ResponseBody == fetched.ResponseBody
+		default: // stored != nil && stored.ResponseBody == fetched.ResponseBody
 			// We already have this response, just update the timestamp
 			stored.LastFetchedAt = now
 			if err := svc.storage.Update(ctx, stored); err != nil {
 				svc.log.Error("failed to update stored response", zap.Error(err))
 			}
-			if parsed := getParsedResp(apiName, stored); parsed != nil {
+			if parsed := getParsedResp(apiName, *stored); parsed != nil { // we can dereference here because we know that stored != nil
 				result = append(result, parsed)
 			}
 		}
@@ -184,7 +182,7 @@ func (svc *ServiceImpl) analyzeStoredResponses(
 			continue
 		}
 
-		if parsed, err := svc.parseApiResponse(resp); err == nil {
+		if parsed, err := svc.parseApiResponse(*resp); err == nil { // we can dereference here because we know that resp != nil
 			parsedResponsesMap[apiName] = parsed
 			if !isParcelDelivered && parsed.IsDelivered() {
 				isParcelDelivered = true
@@ -247,10 +245,10 @@ func (svc *ServiceImpl) analyzeStoredResponses(
 
 // fetchResponses fetches responses from all the APIs in parallel.
 // It does not return any errors; any errors are reflected in responses.
-func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber string, apisToHit []string) map[string]*PostalApiResponse {
-	fetchedResponsesMap := make(map[string]*PostalApiResponse, len(apisToHit))
+func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber string, apisToHit []string) map[string]PostalApiResponse {
+	fetchedResponsesMap := make(map[string]PostalApiResponse, len(apisToHit))
 
-	resultsChan := make(chan *PostalApiResponse, len(apisToHit))
+	resultsChan := make(chan PostalApiResponse, len(apisToHit))
 	wg := sync.WaitGroup{}
 
 	ttlCtx, cancel := context.WithTimeout(ctx, svc.apiFetchTimeout)
@@ -266,22 +264,13 @@ func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber strin
 
 	wg.Wait()
 	for i := 0; i < len(apisToHit); i++ {
-		var resp *PostalApiResponse
+		var resp PostalApiResponse
 		select {
 		case <-ttlCtx.Done(): // yes, we pass the context to the API,
 			// but can we really trust them to respect it?
 			return fetchedResponsesMap
 		case resp = <-resultsChan:
-			break
-		}
-
-		if resp == nil {
-			svc.log.Debug(
-				"nil response from API",
-				zap.String("api", resp.ApiName),
-				zap.String("trackingNumber", trackingNumber),
-			)
-			continue
+			break // break select
 		}
 		fetchedResponsesMap[resp.ApiName] = resp
 	}
@@ -290,7 +279,7 @@ func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber strin
 	return fetchedResponsesMap
 }
 
-func (svc *ServiceImpl) parseApiResponse(resp *PostalApiResponse) (*TrackingInfo, error) {
+func (svc *ServiceImpl) parseApiResponse(resp PostalApiResponse) (*TrackingInfo, error) {
 	if resp.Status != StatusSuccess {
 		return nil, fmt.Errorf("not parsing a response with a non-success status")
 	}

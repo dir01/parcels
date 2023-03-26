@@ -18,6 +18,7 @@ precommit: # Run all possible checks before committing
 	make format
 	make vendor
 	make tidy
+	make build
 	make test
 .PHONY: precommit
 

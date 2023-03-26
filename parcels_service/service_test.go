@@ -27,17 +27,13 @@ func TestService(t *testing.T) {
 	prepareTestSubjects := func() (
 		svc *parcels_service.ServiceImpl,
 		storage *mocks.StorageMock,
-		timeCh chan time.Time,
+		setNow func(t time.Time),
 		api1 *mocks.PostalApiMock,
 	) {
 		now := time.Now()
-		timeCh = make(chan time.Time)
-		go func() {
-			for newNow := range timeCh {
-				now = newNow
-			}
-		}()
-
+		setNow = func(t time.Time) {
+			now = t
+		}
 		storage = mocks.NewStorageMock(t)
 
 		api1 = mocks.NewPostalApiMock(t)
@@ -60,16 +56,16 @@ func TestService(t *testing.T) {
 			},
 		)
 
-		return svc, storage, timeCh, api1
+		return svc, storage, setNow, api1
 	}
 
 	t.Run("new tracking number", func(t *testing.T) {
 		callCtx := context.WithValue(context.Background(), "foo", "bar")
-		svc, storage, _, api1 := prepareTestSubjects()
+		svc, storage, setNow, api1 := prepareTestSubjects()
 
 		storage.GetLatestMock.Expect(callCtx, "123", []string{"api1"}).Return(nil, nil)
 
-		api1Response := &parcels_service.PostalApiResponse{
+		api1Response := parcels_service.PostalApiResponse{
 			TrackingNumber: "123",
 			ApiName:        "api1",
 			Status:         parcels_service.StatusSuccess,
@@ -84,7 +80,14 @@ func TestService(t *testing.T) {
 			}
 		}).Return(api1Response)
 
-		storage.InsertMock.Expect(callCtx, "123", "api1", api1Response).Return(nil)
+		now := time.Now()
+		setNow(now)
+
+		// service should set the timestamps, so from now on we expect them to be set
+		api1Response.FirstFetchedAt = now
+		api1Response.LastFetchedAt = now
+
+		storage.InsertMock.Expect(callCtx, "123", "api1", &api1Response).Return(nil)
 
 		api1TrackingInfo := &parcels_service.TrackingInfo{
 			TrackingNumber: "123",
@@ -107,11 +110,12 @@ func TestService(t *testing.T) {
 
 	t.Run("stored tracking - ttl not expired", func(t *testing.T) {
 		callCtx := context.WithValue(context.Background(), "foo", "bar")
-		svc, storage, timeCh, api1 := prepareTestSubjects()
-		defer close(timeCh)
+		svc, storage, setNow, api1 := prepareTestSubjects()
+
 		now := time.Now()
-		timeCh <- now
-		storedRawResponse := &parcels_service.PostalApiResponse{
+		setNow(now)
+
+		storedRawResponse := parcels_service.PostalApiResponse{
 			TrackingNumber: "123",
 			ApiName:        "api1",
 			Status:         parcels_service.StatusSuccess,
@@ -120,7 +124,7 @@ func TestService(t *testing.T) {
 		}
 		storage.GetLatestMock.
 			Expect(callCtx, "123", []string{"api1"}).
-			Return([]*parcels_service.PostalApiResponse{storedRawResponse}, nil)
+			Return([]*parcels_service.PostalApiResponse{&storedRawResponse}, nil)
 		parsedTrackingInfo := &parcels_service.TrackingInfo{
 			TrackingNumber: "123",
 			ApiName:        "api1",
@@ -142,6 +146,49 @@ func TestService(t *testing.T) {
 		}
 		if !reflect.DeepEqual(tr[0], expected) {
 			t.Fatalf("expected tracking info to be %v, got %v", expected, tr[0])
+		}
+	})
+
+	t.Run("not found tracking number", func(t *testing.T) {
+		callCtx := context.WithValue(context.Background(), "foo", "bar")
+		svc, storage, setNow, api1 := prepareTestSubjects()
+
+		storage.GetLatestMock.Expect(callCtx, "123", []string{"api1"}).Return(nil, nil)
+
+		api1Response := parcels_service.PostalApiResponse{
+			TrackingNumber: "123",
+			ApiName:        "api1",
+			Status:         parcels_service.StatusNotFound,
+			ResponseBody:   []byte("whatever"),
+		}
+		api1.FetchMock.Inspect(func(ctx context.Context, trackingNumber string) {
+			if ctx.Value("foo") != "bar" {
+				t.Fatalf("expected context to be inhereted from %v, got %v", callCtx, ctx)
+			}
+			if trackingNumber != "123" {
+				t.Fatalf("expected tracking number to be 123, got %s", trackingNumber)
+			}
+		}).Return(api1Response)
+
+		now := time.Now()
+		setNow(now)
+
+		storage.InsertMock.Expect(callCtx, "123", "api1", &parcels_service.PostalApiResponse{
+			TrackingNumber: "123",
+			ApiName:        "api1",
+			FirstFetchedAt: now,
+			LastFetchedAt:  now,
+			ResponseBody:   []byte("whatever"),
+			Status:         parcels_service.StatusNotFound,
+		}).Return(nil)
+
+		tracking, err := svc.GetTrackingInfo(callCtx, "123")
+		if err != nil {
+			t.Fatalf("failed to get tracking info: %v", err)
+		}
+
+		if len(tracking) != 0 {
+			t.Fatalf("expected 0 tracking info, got %d", len(tracking))
 		}
 	})
 
