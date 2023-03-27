@@ -1,6 +1,7 @@
 package cainiao
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -46,6 +47,11 @@ func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) parcels_serv
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		result.Status = parcels_service.StatusUnknownError
+		return result
+	}
+
+	if bytes.Contains(responseBody, []byte(`"detailList":[]`)) { // cainiao returns 200 with empty detailList when tracking number is not found
+		result.Status = parcels_service.StatusNotFound
 		return result
 	}
 
