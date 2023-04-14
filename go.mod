@@ -3,7 +3,7 @@ module github.com/dir01/parcels
 go 1.19
 
 require (
-	github.com/gojuno/minimock/v3 v3.1.1
+	github.com/gojuno/minimock/v3 v3.1.3
 	github.com/hori-ryota/zaperr v0.0.0-20210301022522-bfd0551d7f64
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-sqlite3 v1.14.16
@@ -28,5 +28,5 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 )
