@@ -1,6 +1,5 @@
-FROM golang:1.20-alpine3.17
-RUN apk add --no-cache make
-RUN apk add --no-cache gcc musl-dev
+FROM golang:1.21-alpine
+RUN apk add --no-cache make gcc musl-dev
 
 WORKDIR /app
 ADD . .
