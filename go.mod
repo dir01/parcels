@@ -8,7 +8,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/prometheus/client_golang v1.17.0
-	github.com/rubenv/sql-migrate v1.4.0
+	github.com/rubenv/sql-migrate v1.5.2
 	go.uber.org/zap v1.26.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 )
