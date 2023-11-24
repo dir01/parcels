@@ -4,14 +4,14 @@ import (
 	"context"
 	"strings"
 
-	"github.com/dir01/parcels/parcels_service"
+	"github.com/dir01/parcels/service"
 	"github.com/hori-ryota/zaperr"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 )
 
-func NewStorage(db *sqlx.DB) parcels_service.Storage {
+func NewStorage(db *sqlx.DB) service.Storage {
 	return &sqliteStorage{db: db}
 }
 
@@ -23,7 +23,7 @@ func (s sqliteStorage) GetLatest(
 	ctx context.Context,
 	trackingNumber string,
 	apiNames []string,
-) ([]*parcels_service.PostalApiResponse, error) {
+) ([]*service.PostalApiResponse, error) {
 	zapFields := []zap.Field{
 		zap.String("trackingNumber", trackingNumber),
 		zap.Strings("apiNames", apiNames),
@@ -48,7 +48,7 @@ func (s sqliteStorage) GetLatest(
 		dbStructs = append(dbStructs, dbStruct)
 	}
 
-	var businessStructs []*parcels_service.PostalApiResponse
+	var businessStructs []*service.PostalApiResponse
 	for _, dbStruct := range dbStructs {
 		businessStructs = append(businessStructs, dbStruct.ToBusinessModel())
 	}
@@ -56,7 +56,7 @@ func (s sqliteStorage) GetLatest(
 	return businessStructs, nil
 }
 
-func (s sqliteStorage) Insert(ctx context.Context, trackingNumber string, apiName string, response *parcels_service.PostalApiResponse) error {
+func (s sqliteStorage) Insert(ctx context.Context, trackingNumber string, apiName string, response *service.PostalApiResponse) error {
 	dbStruct := DBRawPostalApiResponse{}.FromBusinessModel(response)
 	_, err := s.db.NamedExecContext(ctx, `
 		INSERT INTO postal_api_responses 
@@ -71,7 +71,7 @@ func (s sqliteStorage) Insert(ctx context.Context, trackingNumber string, apiNam
 	return nil
 }
 
-func (s sqliteStorage) Update(ctx context.Context, response *parcels_service.PostalApiResponse) error {
+func (s sqliteStorage) Update(ctx context.Context, response *service.PostalApiResponse) error {
 	dbStruct := DBRawPostalApiResponse{}.FromBusinessModel(response)
 	_, err := s.db.NamedExecContext(ctx, `
 		UPDATE postal_api_responses

@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/dir01/parcels/external_postal_apis/cainiao"
+	"github.com/dir01/parcels/externalapis/cainiao"
 	"github.com/dir01/parcels/parcels_api"
-	"github.com/dir01/parcels/parcels_service"
+	"github.com/dir01/parcels/service"
 	"github.com/dir01/parcels/sqlite_storage"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -26,10 +26,12 @@ func main() {
 		bindAddr = bindAddrEnv
 	}
 
-	okCheckInterval := 24 * time.Hour
-	notFoundCheckInterval := 3 * 24 * time.Hour
-	unknownErrorCheckInterval := 3 * time.Hour
-	apiFetchTimeout := 10 * time.Second
+	okCheckInterval := 24 * time.Hour           // how often to check after a successful fetch
+	notFoundCheckInterval := 3 * 24 * time.Hour // how often to check after a not found response
+	unknownErrorCheckInterval := 3 * time.Hour  // how often to check after an unknown error
+	apiFetchTimeout := 10 * time.Second         // how long to wait for a response from an API
+	// expiryTimeout is the time after which a parcel is treated as if we never heard of it
+	// this is due to the fact that sometimes tracking numbers can be reused
 	expiryTimeout := 6 * 30 * 24 * time.Hour
 	// endregion
 
@@ -41,11 +43,11 @@ func main() {
 	db := sqlx.MustOpen("sqlite3", dbPath)
 	storage := sqlite_storage.NewStorage(db)
 
-	apiMap := map[string]parcels_service.PostalApi{
+	apiMap := map[string]service.PostalApi{
 		"cainiao": cainiao.New(),
 	}
 
-	service := parcels_service.NewService(
+	service := service.NewService(
 		apiMap,
 		storage,
 		okCheckInterval,

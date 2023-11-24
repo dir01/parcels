@@ -8,11 +8,11 @@ import (
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
-	mm_parcels_service "github.com/dir01/parcels/parcels_service"
+	mm_parcels_service "github.com/dir01/parcels/service"
 	"github.com/gojuno/minimock/v3"
 )
 
-// PostalApiMock implements parcels_service.PostalApi
+// PostalApiMock implements service.PostalApi
 type PostalApiMock struct {
 	t minimock.Tester
 
@@ -29,7 +29,7 @@ type PostalApiMock struct {
 	ParseMock          mPostalApiMockParse
 }
 
-// NewPostalApiMock returns a mock for parcels_service.PostalApi
+// NewPostalApiMock returns a mock for service.PostalApi
 func NewPostalApiMock(t minimock.Tester) *PostalApiMock {
 	m := &PostalApiMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -152,7 +152,7 @@ func (e *PostalApiMockFetchExpectation) Then(p1 mm_parcels_service.PostalApiResp
 	return e.mock
 }
 
-// Fetch implements parcels_service.PostalApi
+// Fetch implements service.PostalApi
 func (mmFetch *PostalApiMock) Fetch(ctx context.Context, trackingNumber string) (p1 mm_parcels_service.PostalApiResponse) {
 	mm_atomic.AddUint64(&mmFetch.beforeFetchCounter, 1)
 	defer mm_atomic.AddUint64(&mmFetch.afterFetchCounter, 1)
@@ -368,7 +368,7 @@ func (e *PostalApiMockParseExpectation) Then(tp1 *mm_parcels_service.TrackingInf
 	return e.mock
 }
 
-// Parse implements parcels_service.PostalApi
+// Parse implements service.PostalApi
 func (mmParse *PostalApiMock) Parse(rawResponse mm_parcels_service.PostalApiResponse) (tp1 *mm_parcels_service.TrackingInfo, err error) {
 	mm_atomic.AddUint64(&mmParse.beforeParseCounter, 1)
 	defer mm_atomic.AddUint64(&mmParse.afterParseCounter, 1)

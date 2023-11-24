@@ -3,7 +3,7 @@ package sqlite_storage
 import (
 	"time"
 
-	"github.com/dir01/parcels/parcels_service"
+	"github.com/dir01/parcels/service"
 )
 
 type DBRawPostalApiResponse struct {
@@ -16,19 +16,19 @@ type DBRawPostalApiResponse struct {
 	Status         string `db:"status"`
 }
 
-func (r DBRawPostalApiResponse) ToBusinessModel() *parcels_service.PostalApiResponse {
-	return &parcels_service.PostalApiResponse{
+func (r DBRawPostalApiResponse) ToBusinessModel() *service.PostalApiResponse {
+	return &service.PostalApiResponse{
 		ID:             r.ID,
 		ApiName:        r.ApiName,
 		TrackingNumber: r.TrackingNumber,
 		FirstFetchedAt: fromUnixTime(r.FirstFetchedAt),
 		LastFetchedAt:  fromUnixTime(r.LastFetchedAt),
 		ResponseBody:   r.ResponseBody,
-		Status:         parcels_service.ApiResponseStatus(r.Status),
+		Status:         service.ApiResponseStatus(r.Status),
 	}
 }
 
-func (r DBRawPostalApiResponse) FromBusinessModel(rawResp *parcels_service.PostalApiResponse) *DBRawPostalApiResponse {
+func (r DBRawPostalApiResponse) FromBusinessModel(rawResp *service.PostalApiResponse) *DBRawPostalApiResponse {
 	r.ID = rawResp.ID
 	r.ApiName = rawResp.ApiName
 	r.TrackingNumber = rawResp.TrackingNumber

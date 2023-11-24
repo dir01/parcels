@@ -3,7 +3,7 @@ package parcels_api
 import (
 	"time"
 
-	"github.com/dir01/parcels/parcels_service"
+	"github.com/dir01/parcels/service"
 )
 
 // TrackingInfo represents a single track of a parcel according to one carrier in an API response
@@ -23,7 +23,7 @@ type TrackingEvent struct {
 	Status      string `json:"status"`
 }
 
-func (hti TrackingInfo) fromBusinessStruct(t *parcels_service.TrackingInfo) *TrackingInfo {
+func (hti TrackingInfo) fromBusinessStruct(t *service.TrackingInfo) *TrackingInfo {
 	hti.TrackingNumber = t.TrackingNumber
 	hti.ApiName = t.ApiName
 	hti.IsDelivered = t.IsDelivered()

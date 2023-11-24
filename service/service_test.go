@@ -1,4 +1,4 @@
-package parcels_service_test
+package service_test
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dir01/parcels/parcels_service"
-	"github.com/dir01/parcels/parcels_service/mocks"
+	"github.com/dir01/parcels/service"
+	"github.com/dir01/parcels/service/mocks"
 	"go.uber.org/zap"
 )
 
@@ -25,7 +25,7 @@ func TestService(t *testing.T) {
 	expiryTimeout := 6 * 30 * 24 * time.Hour
 
 	prepareTestSubjects := func() (
-		svc *parcels_service.ServiceImpl,
+		svc *service.ServiceImpl,
 		storage *mocks.StorageMock,
 		setNow func(t time.Time),
 		api1 *mocks.PostalApiMock,
@@ -38,11 +38,11 @@ func TestService(t *testing.T) {
 
 		api1 = mocks.NewPostalApiMock(t)
 
-		apiMap := map[string]parcels_service.PostalApi{
+		apiMap := map[string]service.PostalApi{
 			"api1": api1,
 		}
 
-		svc = parcels_service.NewService(
+		svc = service.NewService(
 			apiMap,
 			storage,
 			okCheckInterval,
@@ -65,10 +65,10 @@ func TestService(t *testing.T) {
 
 		storage.GetLatestMock.Expect(callCtx, "123", []string{"api1"}).Return(nil, nil)
 
-		api1Response := parcels_service.PostalApiResponse{
+		api1Response := service.PostalApiResponse{
 			TrackingNumber: "123",
 			ApiName:        "api1",
-			Status:         parcels_service.StatusSuccess,
+			Status:         service.StatusSuccess,
 			ResponseBody:   []byte("foo"),
 		}
 		api1.FetchMock.Inspect(func(ctx context.Context, trackingNumber string) {
@@ -89,7 +89,7 @@ func TestService(t *testing.T) {
 
 		storage.InsertMock.Expect(callCtx, "123", "api1", &api1Response).Return(nil)
 
-		api1TrackingInfo := &parcels_service.TrackingInfo{
+		api1TrackingInfo := &service.TrackingInfo{
 			TrackingNumber: "123",
 			ApiName:        "api1",
 		}
@@ -115,17 +115,17 @@ func TestService(t *testing.T) {
 		now := time.Now()
 		setNow(now)
 
-		storedRawResponse := parcels_service.PostalApiResponse{
+		storedRawResponse := service.PostalApiResponse{
 			TrackingNumber: "123",
 			ApiName:        "api1",
-			Status:         parcels_service.StatusSuccess,
+			Status:         service.StatusSuccess,
 			ResponseBody:   []byte("foo"),
 			LastFetchedAt:  now.Add(-(okCheckInterval / 2)),
 		}
 		storage.GetLatestMock.
 			Expect(callCtx, "123", []string{"api1"}).
-			Return([]*parcels_service.PostalApiResponse{&storedRawResponse}, nil)
-		parsedTrackingInfo := &parcels_service.TrackingInfo{
+			Return([]*service.PostalApiResponse{&storedRawResponse}, nil)
+		parsedTrackingInfo := &service.TrackingInfo{
 			TrackingNumber: "123",
 			ApiName:        "api1",
 		}
@@ -139,7 +139,7 @@ func TestService(t *testing.T) {
 		if len(tr) != 1 {
 			t.Fatalf("expected 1 tracking info, got %d", len(tr))
 		}
-		expected := &parcels_service.TrackingInfo{
+		expected := &service.TrackingInfo{
 			TrackingNumber: "123",
 			ApiName:        "api1",
 			LastFetchedAt:  now.Add(-(okCheckInterval / 2)),
@@ -155,10 +155,10 @@ func TestService(t *testing.T) {
 
 		storage.GetLatestMock.Expect(callCtx, "123", []string{"api1"}).Return(nil, nil)
 
-		api1Response := parcels_service.PostalApiResponse{
+		api1Response := service.PostalApiResponse{
 			TrackingNumber: "123",
 			ApiName:        "api1",
-			Status:         parcels_service.StatusNotFound,
+			Status:         service.StatusNotFound,
 			ResponseBody:   []byte("whatever"),
 		}
 		api1.FetchMock.Inspect(func(ctx context.Context, trackingNumber string) {
@@ -173,13 +173,13 @@ func TestService(t *testing.T) {
 		now := time.Now()
 		setNow(now)
 
-		storage.InsertMock.Expect(callCtx, "123", "api1", &parcels_service.PostalApiResponse{
+		storage.InsertMock.Expect(callCtx, "123", "api1", &service.PostalApiResponse{
 			TrackingNumber: "123",
 			ApiName:        "api1",
 			FirstFetchedAt: now,
 			LastFetchedAt:  now,
 			ResponseBody:   []byte("whatever"),
-			Status:         parcels_service.StatusNotFound,
+			Status:         service.StatusNotFound,
 		}).Return(nil)
 
 		tracking, err := svc.GetTrackingInfo(callCtx, "123")

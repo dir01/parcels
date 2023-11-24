@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/dir01/parcels/parcels_service"
+	"github.com/dir01/parcels/service"
 	"github.com/hori-ryota/zaperr"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
-func NewServer(parcelsService parcels_service.Service, logger *zap.Logger) *HttpServer {
+func NewServer(parcelsService service.Service, logger *zap.Logger) *HttpServer {
 	return &HttpServer{
 		parcelsService: parcelsService,
 		logger:         logger,
@@ -18,7 +18,7 @@ func NewServer(parcelsService parcels_service.Service, logger *zap.Logger) *Http
 }
 
 type HttpServer struct {
-	parcelsService parcels_service.Service
+	parcelsService service.Service
 	logger         *zap.Logger
 }
 

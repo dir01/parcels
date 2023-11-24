@@ -8,11 +8,11 @@ import (
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
-	mm_parcels_service "github.com/dir01/parcels/parcels_service"
+	mm_parcels_service "github.com/dir01/parcels/service"
 	"github.com/gojuno/minimock/v3"
 )
 
-// StorageMock implements parcels_service.Storage
+// StorageMock implements service.Storage
 type StorageMock struct {
 	t minimock.Tester
 
@@ -35,7 +35,7 @@ type StorageMock struct {
 	UpdateMock          mStorageMockUpdate
 }
 
-// NewStorageMock returns a mock for parcels_service.Storage
+// NewStorageMock returns a mock for service.Storage
 func NewStorageMock(t minimock.Tester) *StorageMock {
 	m := &StorageMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
@@ -163,7 +163,7 @@ func (e *StorageMockGetLatestExpectation) Then(ppa1 []*mm_parcels_service.Postal
 	return e.mock
 }
 
-// GetLatest implements parcels_service.Storage
+// GetLatest implements service.Storage
 func (mmGetLatest *StorageMock) GetLatest(ctx context.Context, trackingNumber string, apiNames []string) (ppa1 []*mm_parcels_service.PostalApiResponse, err error) {
 	mm_atomic.AddUint64(&mmGetLatest.beforeGetLatestCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetLatest.afterGetLatestCounter, 1)
@@ -381,7 +381,7 @@ func (e *StorageMockInsertExpectation) Then(err error) *StorageMock {
 	return e.mock
 }
 
-// Insert implements parcels_service.Storage
+// Insert implements service.Storage
 func (mmInsert *StorageMock) Insert(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse) (err error) {
 	mm_atomic.AddUint64(&mmInsert.beforeInsertCounter, 1)
 	defer mm_atomic.AddUint64(&mmInsert.afterInsertCounter, 1)
@@ -597,7 +597,7 @@ func (e *StorageMockUpdateExpectation) Then(err error) *StorageMock {
 	return e.mock
 }
 
-// Update implements parcels_service.Storage
+// Update implements service.Storage
 func (mmUpdate *StorageMock) Update(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse) (err error) {
 	mm_atomic.AddUint64(&mmUpdate.beforeUpdateCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdate.afterUpdateCounter, 1)

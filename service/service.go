@@ -1,4 +1,4 @@
-package parcels_service
+package service
 
 import (
 	"bytes"
