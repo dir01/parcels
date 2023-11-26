@@ -33,10 +33,18 @@ func (s sqliteStorage) GetLatest(
 		zap.Strings("apiNames", apiNamesStr),
 	}
 	rows, err := s.db.QueryxContext(ctx, `
-		SELECT * FROM postal_api_responses 
-		         WHERE tracking_number = ? 
-		           AND api_name IN (?) 
-		         ORDER BY last_fetched_at DESC;`, trackingNumber, strings.Join(apiNamesStr, ","))
+		SELECT p1.*
+		FROM postal_api_responses p1
+		JOIN (
+			SELECT api_name, MAX(last_fetched_at) as max_fetched
+			FROM postal_api_responses
+			WHERE tracking_number = ?
+			AND api_name IN (?)
+			GROUP BY api_name
+		) p2 ON p1.api_name = p2.api_name AND p1.last_fetched_at = p2.max_fetched
+		WHERE p1.tracking_number = ?
+		AND p1.api_name IN (?)
+`, trackingNumber, strings.Join(apiNamesStr, ","), trackingNumber, strings.Join(apiNamesStr, ","))
 	if err != nil {
 		return nil, zaperr.Wrap(err, "failed to QueryxContext", zapFields...)
 	}

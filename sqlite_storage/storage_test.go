@@ -74,6 +74,60 @@ func TestStorage(t *testing.T) {
 		}
 	})
 
+	t.Run("GetLatest returns only latest", func(t *testing.T) {
+		storage := prepareTestSubject()
+
+		oldResp := service.PostalApiResponse{
+			ID:             0,
+			TrackingNumber: "some-tracking-number",
+			APIName:        "some-api-name",
+			FirstFetchedAt: time.Unix(1000, 0),
+			LastFetchedAt:  time.Unix(2000, 0),
+			ResponseBody:   []byte("some-response-body"),
+			Status:         service.StatusSuccess,
+		}
+
+		newResp := oldResp
+		newResp.LastFetchedAt = time.Unix(3000, 0)
+
+		if err := storage.Insert(context.TODO(), "some-tracking-number", "some-api-name", &oldResp); err != nil {
+			t.Fatalf("failed to insert oldResp: %v", err)
+		}
+		if err := storage.Insert(context.TODO(), "some-tracking-number", "some-api-name", &newResp); err != nil {
+			t.Fatalf("failed to insert newResp: %v", err)
+		}
+
+		latest, err := storage.GetLatest(context.TODO(), "some-tracking-number", []service.APIName{"some-api-name"})
+		if err != nil {
+			t.Fatalf("failed to get latest: %v", err)
+		}
+		if latest == nil {
+			t.Fatalf("expected response to be non-nil")
+		}
+		if len(latest) != 1 {
+			t.Fatalf("expected 1 response, got %d", len(latest))
+		}
+		fetchedResp := latest[0]
+		if fetchedResp.TrackingNumber != newResp.TrackingNumber {
+			t.Fatalf("expected tracking number to be %s, got %s", newResp.TrackingNumber, fetchedResp.TrackingNumber)
+		}
+		if fetchedResp.APIName != newResp.APIName {
+			t.Fatalf("expected api name to be %s, got %s", newResp.APIName, fetchedResp.APIName)
+		}
+		if fetchedResp.FirstFetchedAt != newResp.FirstFetchedAt {
+			t.Fatalf("expected first fetched at to be %s, got %s", newResp.FirstFetchedAt, fetchedResp.FirstFetchedAt)
+		}
+		if fetchedResp.LastFetchedAt != newResp.LastFetchedAt {
+			t.Fatalf("expected last fetched at to be %s, got %s", newResp.LastFetchedAt, fetchedResp.LastFetchedAt)
+		}
+		if !bytes.Equal(fetchedResp.ResponseBody, newResp.ResponseBody) {
+			t.Fatalf("expected response body to be %s, got %s", newResp.ResponseBody, fetchedResp.ResponseBody)
+		}
+		if fetchedResp.Status != newResp.Status {
+			t.Fatalf("expected status to be %s, got %s", newResp.Status, fetchedResp.Status)
+		}
+	})
+
 	t.Run("Insert, Update and GetLatest", func(t *testing.T) {
 		storage := prepareTestSubject()
 
