@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dir01/parcels/metrics"
 	"net"
 	"net/http"
 	"os"
@@ -43,6 +44,8 @@ func main() {
 	db := sqlx.MustOpen("sqlite3", dbPath)
 	storage := sqlite_storage.NewStorage(db)
 
+	promMetrics := metrics.NewPrometheus([]service.APIName{cainiao.APIName})
+
 	apiMap := map[service.APIName]service.PostalAPI{
 		cainiao.APIName: cainiao.New(),
 	}
@@ -50,6 +53,7 @@ func main() {
 	svc := service.NewService(
 		apiMap,
 		storage,
+		promMetrics,
 		okCheckInterval,
 		notFoundCheckInterval,
 		unknownErrorCheckInterval,

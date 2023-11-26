@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"context"
+	"github.com/dir01/parcels/metrics"
 	"reflect"
 	"testing"
 	"time"
@@ -11,12 +12,16 @@ import (
 	"go.uber.org/zap"
 )
 
+var api1Name service.APIName = "api1"
+
 //go:generate minimock -g -i github.com/dir01/parcels/service.Storage,github.com/dir01/parcels/service.PostalAPI -o ./mocks -s _mock.go
 func TestService(t *testing.T) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		t.Fatalf("failed to create logger: %v", err)
 	}
+
+	promMetrics := metrics.NewPrometheus([]service.APIName{api1Name})
 
 	okCheckInterval := 24 * time.Hour
 	notFoundCheckInterval := 3 * 24 * time.Hour
@@ -34,17 +39,18 @@ func TestService(t *testing.T) {
 		setNow = func(t time.Time) {
 			now = t
 		}
-		storage = mocks.NewStorageMock(t)
 
+		storage = mocks.NewStorageMock(t)
 		api1 = mocks.NewPostalAPIMock(t)
 
 		apiMap := map[service.APIName]service.PostalAPI{
-			"api1": api1,
+			api1Name: api1,
 		}
 
 		svc = service.NewService(
 			apiMap,
 			storage,
+			promMetrics,
 			okCheckInterval,
 			notFoundCheckInterval,
 			unknownErrorCheckInterval,
@@ -63,11 +69,11 @@ func TestService(t *testing.T) {
 		callCtx := context.WithValue(context.Background(), "foo", "bar")
 		svc, storage, setNow, api1 := prepareTestSubjects()
 
-		storage.GetLatestMock.Expect(callCtx, "123", []service.APIName{"api1"}).Return(nil, nil)
+		storage.GetLatestMock.Expect(callCtx, "123", []service.APIName{api1Name}).Return(nil, nil)
 
 		api1Response := service.PostalApiResponse{
 			TrackingNumber: "123",
-			APIName:        "api1",
+			APIName:        api1Name,
 			Status:         service.StatusSuccess,
 			ResponseBody:   []byte("foo"),
 		}
@@ -87,11 +93,11 @@ func TestService(t *testing.T) {
 		api1Response.FirstFetchedAt = now
 		api1Response.LastFetchedAt = now
 
-		storage.InsertMock.Expect(callCtx, "123", "api1", &api1Response).Return(nil)
+		storage.InsertMock.Expect(callCtx, "123", api1Name, &api1Response).Return(nil)
 
 		api1TrackingInfo := &service.TrackingInfo{
 			TrackingNumber: "123",
-			ApiName:        "api1",
+			ApiName:        api1Name,
 		}
 		api1.ParseMock.Expect(api1Response).Return(api1TrackingInfo, nil)
 
@@ -117,17 +123,17 @@ func TestService(t *testing.T) {
 
 		storedRawResponse := service.PostalApiResponse{
 			TrackingNumber: "123",
-			APIName:        "api1",
+			APIName:        api1Name,
 			Status:         service.StatusSuccess,
 			ResponseBody:   []byte("foo"),
 			LastFetchedAt:  now.Add(-(okCheckInterval / 2)),
 		}
 		storage.GetLatestMock.
-			Expect(callCtx, "123", []service.APIName{"api1"}).
+			Expect(callCtx, "123", []service.APIName{api1Name}).
 			Return([]*service.PostalApiResponse{&storedRawResponse}, nil)
 		parsedTrackingInfo := &service.TrackingInfo{
 			TrackingNumber: "123",
-			ApiName:        "api1",
+			ApiName:        api1Name,
 		}
 		api1.ParseMock.Expect(storedRawResponse).Return(parsedTrackingInfo, nil)
 
@@ -141,7 +147,7 @@ func TestService(t *testing.T) {
 		}
 		expected := &service.TrackingInfo{
 			TrackingNumber: "123",
-			ApiName:        "api1",
+			ApiName:        api1Name,
 			LastFetchedAt:  now.Add(-(okCheckInterval / 2)),
 		}
 		if !reflect.DeepEqual(tr[0], expected) {
@@ -153,11 +159,11 @@ func TestService(t *testing.T) {
 		callCtx := context.WithValue(context.Background(), "foo", "bar")
 		svc, storage, setNow, api1 := prepareTestSubjects()
 
-		storage.GetLatestMock.Expect(callCtx, "123", []service.APIName{"api1"}).Return(nil, nil)
+		storage.GetLatestMock.Expect(callCtx, "123", []service.APIName{api1Name}).Return(nil, nil)
 
 		api1Response := service.PostalApiResponse{
 			TrackingNumber: "123",
-			APIName:        "api1",
+			APIName:        api1Name,
 			Status:         service.StatusNotFound,
 			ResponseBody:   []byte("whatever"),
 		}
@@ -173,9 +179,9 @@ func TestService(t *testing.T) {
 		now := time.Now()
 		setNow(now)
 
-		storage.InsertMock.Expect(callCtx, "123", "api1", &service.PostalApiResponse{
+		storage.InsertMock.Expect(callCtx, "123", api1Name, &service.PostalApiResponse{
 			TrackingNumber: "123",
-			APIName:        "api1",
+			APIName:        api1Name,
 			FirstFetchedAt: now,
 			LastFetchedAt:  now,
 			ResponseBody:   []byte("whatever"),

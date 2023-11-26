@@ -14,9 +14,14 @@ import (
 
 type APIName string
 
+type Service interface {
+	GetTrackingInfo(ctx context.Context, trackingNumber string) ([]*TrackingInfo, error)
+}
+
 func NewService(
 	postalApiMap map[APIName]PostalAPI,
 	storage Storage,
+	metrics Metrics,
 	okCheckInterval time.Duration,
 	notFoundCheckInterval time.Duration,
 	unknownErrorCheckInterval time.Duration,
@@ -29,6 +34,7 @@ func NewService(
 		apiMap:                    postalApiMap,
 		apiNames:                  maps.Keys(postalApiMap),
 		storage:                   storage,
+		metrics:                   metrics,
 		okCheckInterval:           okCheckInterval,
 		notFoundCheckInterval:     notFoundCheckInterval,
 		unknownErrorCheckInterval: unknownErrorCheckInterval,
@@ -41,14 +47,11 @@ func NewService(
 	return s
 }
 
-type Service interface {
-	GetTrackingInfo(ctx context.Context, trackingNumber string) ([]*TrackingInfo, error)
-}
-
 type Impl struct {
 	apiMap                    map[APIName]PostalAPI
 	apiNames                  []APIName
 	storage                   Storage
+	metrics                   Metrics
 	okCheckInterval           time.Duration
 	notFoundCheckInterval     time.Duration
 	unknownErrorCheckInterval time.Duration
@@ -64,8 +67,26 @@ type Impl struct {
 // However, this storage is only concerned with the last response.
 type Storage interface {
 	GetLatest(ctx context.Context, trackingNumber string, apiNames []APIName) ([]*PostalApiResponse, error)
-	Insert(ctx context.Context, trackingNumber string, apiName APIName, response *PostalApiResponse) error // signature requires trackingNumber and apiName just to add gravity to api contract
+	// Insert signature requires trackingNumber and apiName just to add gravity to api contract
+	// PostalApiResponse could have no
+	Insert(ctx context.Context, trackingNumber string, apiName APIName, response *PostalApiResponse) error
 	Update(context.Context, *PostalApiResponse) error
+}
+
+// Metrics describes what custom metrics service should report on
+type Metrics interface {
+	ParcelDelivered()
+
+	FetchedChanged(APIName)
+	FetchedFirst(APIName)
+	FetchedUnchanged(APIName)
+
+	APIHit(APIName)
+	APIParseError(APIName)
+
+	CacheBustAfterSuccess(apiName APIName, willRefetch bool)
+	CacheBustAfterUnknownError(apiName APIName, willRefetch bool)
+	CacheBustAfterNotFoundError(apiName APIName, willRefetch bool)
 }
 
 // PostalAPI represents a single postal service API.
@@ -98,6 +119,7 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 			"parcel is delivered",
 			zap.String("trackingNumber", trackingNumber),
 		)
+		svc.metrics.ParcelDelivered()
 		return maps.Values(parsedResponsesMap), nil
 	}
 
@@ -112,6 +134,8 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 			return parsed
 		} else if parsed, err := svc.parseApiResponse(rawResp); err == nil {
 			return parsed
+		} else if err != nil {
+			svc.metrics.APIParseError(apiName)
 		}
 		return nil
 	}
@@ -128,6 +152,11 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 				result = append(result, parsed)
 			}
 		case stored == nil || !bytes.Equal(stored.ResponseBody, fetched.ResponseBody):
+			if stored != nil {
+				svc.metrics.FetchedChanged(apiName)
+			} else {
+				svc.metrics.FetchedFirst(apiName)
+			}
 			// Something new, store it and return it (but only if it's not an error)
 			fetched.FirstFetchedAt = now
 			fetched.LastFetchedAt = now
@@ -141,6 +170,7 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 			}
 		default: // stored != nil && stored.ResponseBody == fetched.ResponseBody
 			// We already have this response, just update the timestamp
+			svc.metrics.FetchedUnchanged(apiName)
 			stored.LastFetchedAt = now
 			if err := svc.storage.Update(ctx, stored); err != nil {
 				svc.log.Error("failed to update stored response", zap.Error(err))
@@ -222,23 +252,26 @@ func (svc *Impl) analyzeStoredResponses(
 			// So we know that this API is a relevant one.
 			// Should be checked most often.
 			recheckAt := resp.LastFetchedAt.Add(svc.okCheckInterval)
-			isCheckTimeoutPassed := svc.now().After(recheckAt)
-			apiHitDecisionMap[apiName] = isCheckTimeoutPassed
+			shouldRefetch := svc.now().After(recheckAt)
+			apiHitDecisionMap[apiName] = shouldRefetch
+			svc.metrics.CacheBustAfterSuccess(apiName, shouldRefetch)
 			continue
 		case resp.Status == StatusUnknownError:
 			// Last time we got an error from this API.
 			// This tells us nothing about relevance of this API.
 			// Should be checked less often.
 			recheckAt := resp.LastFetchedAt.Add(svc.unknownErrorCheckInterval)
-			isCheckTimeoutPassed := svc.now().After(recheckAt)
-			apiHitDecisionMap[apiName] = isCheckTimeoutPassed
+			shouldRefetch := svc.now().After(recheckAt)
+			apiHitDecisionMap[apiName] = shouldRefetch
+			svc.metrics.CacheBustAfterUnknownError(apiName, shouldRefetch)
 		case resp.Status == StatusNotFound:
 			// API never indicated that it knows about this tracking number.
 			// Most likely, it's not a relevant API.
 			// Should be checked least often.
 			recheckAt := resp.LastFetchedAt.Add(svc.notFoundCheckInterval)
-			isCheckTimeoutPassed := svc.now().After(recheckAt)
-			apiHitDecisionMap[apiName] = isCheckTimeoutPassed
+			shouldRefetch := svc.now().After(recheckAt)
+			apiHitDecisionMap[apiName] = shouldRefetch
+			svc.metrics.CacheBustAfterNotFoundError(apiName, shouldRefetch)
 		default:
 			// TODO: check for mentioned countries, and reconsider relevance of the API
 		}
@@ -276,6 +309,7 @@ func (svc *Impl) fetchResponses(
 		go func(apiName APIName) {
 			defer wg.Done()
 
+			svc.metrics.APIHit(apiName)
 			resp := svc.apiMap[apiName].Fetch(ttlCtx, trackingNumber)
 			resultsChan <- resp
 		}(apiName)
