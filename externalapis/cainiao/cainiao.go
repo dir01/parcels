@@ -25,7 +25,13 @@ func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) service.Post
 	}
 
 	url := fmt.Sprintf("https://global.cainiao.com/global/detail.json?mailNos=%s&lang=en-US", trackingNumber)
-	resp, err := http.Get(url)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		result.Status = service.StatusUnknownError
+		return result
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		result.Status = service.StatusUnknownError
 		return result
