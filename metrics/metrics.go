@@ -12,73 +12,73 @@ func NewPrometheus(apiNames []service.APIName) service.Metrics {
 	}
 
 	parcelDeliveredCounter := prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "parcel_delivered_total",
+		Name: "parcels_parcel_delivered_total",
 		Help: "Parcel have been delivered, no requests will hit APIs",
 	})
 	prometheus.MustRegister(parcelDeliveredCounter)
 
 	fetchedChanged := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "fetched_changed_total",
+		Name: "parcels_fetched_changed_total",
 		Help: "API have been fetched and API response does not match cached one",
 	}, apiLabels)
 	prometheus.MustRegister(fetchedChanged)
 
 	fetchedFirst := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "fetched_first_total",
+		Name: "parcels_fetched_first_total",
 		Help: "API have been fetched for the first time",
 	}, apiLabels)
 	prometheus.MustRegister(fetchedFirst)
 
 	fetchedUnchanged := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "fetched_unchanged_total",
+		Name: "parcels_fetched_unchanged_total",
 		Help: "API have been fetched and API response is the same as cached one",
 	}, apiLabels)
 	prometheus.MustRegister(fetchedUnchanged)
 
 	apiHit := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "api_hit_total",
+		Name: "parcels_api_hit_total",
 		Help: "Total amount of API hits",
 	}, apiLabels)
 	prometheus.MustRegister(apiHit)
 
 	apiParseError := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "api_parse_error_total",
+		Name: "parcels_api_parse_error_total",
 		Help: "API response fetched successfully, but we failed to parse its response",
 	}, apiLabels)
 	prometheus.MustRegister(apiParseError)
 
 	cacheBustAfterSuccess := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "cache_bust_after_success_total",
+		Name: "parcels_cache_bust_after_success_total",
 		Help: "After inspecting cached response that was successful, we decided to bust it and refetch API",
 	}, apiLabels)
 	prometheus.MustRegister(cacheBustAfterSuccess)
 
 	cacheHitAfterSuccess := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "cache_hit_after_success_total",
+		Name: "parcels_cache_hit_after_success_total",
 		Help: "After inspecting cached response that was successful, we decided to use it and not refetch API",
 	}, apiLabels)
 	prometheus.MustRegister(cacheHitAfterSuccess)
 
 	cacheBustAfterUnknownError := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "cache_bust_after_unknown_error_total",
+		Name: "parcels_cache_bust_after_unknown_error_total",
 		Help: "After inspecting cached response that had status 'unknown error', we decided to bust it and refetch API",
 	}, apiLabels)
 	prometheus.MustRegister(cacheBustAfterUnknownError)
 
 	cacheHitAfterUnknownError := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "cache_hit_after_unknown_error_total",
+		Name: "parcels_cache_hit_after_unknown_error_total",
 		Help: "After inspecting cached response that had status 'unknown error', we decided to use it and not refetch API",
 	}, apiLabels)
 	prometheus.MustRegister(cacheHitAfterUnknownError)
 
 	cacheBustAfterNotFoundError := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "cache_bust_after_not_found_error_total",
+		Name: "parcels_cache_bust_after_not_found_error_total",
 		Help: "After inspecting cached response that had status 'not found', we decided to bust it and refetch API",
 	}, apiLabels)
 	prometheus.MustRegister(cacheBustAfterNotFoundError)
 
 	cacheHitAfterNotFoundError := prometheus.NewCounterVec(prometheus.CounterOpts{
-		Name: "cache_hit_after_not_found_error_total",
+		Name: "parcels_cache_hit_after_not_found_error_total",
 		Help: "After inspecting cached response that had status 'not found', we decided to use it and not refetch API",
 	}, apiLabels)
 	prometheus.MustRegister(cacheHitAfterNotFoundError)
