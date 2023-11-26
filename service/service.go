@@ -135,6 +135,12 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 		} else if parsed, err := svc.parseApiResponse(rawResp); err == nil {
 			return parsed
 		} else if err != nil {
+			svc.log.Error(
+				"failed to parse response",
+				zap.Error(err),
+				zap.String("apiName", string(apiName)),
+				zap.Int64("rawResponseID", rawResp.ID),
+			)
 			svc.metrics.APIParseError(apiName)
 		}
 		return nil
