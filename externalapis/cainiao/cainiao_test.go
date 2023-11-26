@@ -44,7 +44,7 @@ func TestCainiao(t *testing.T) {
 	})
 }
 
-func loadGoldenOrFetch(t *testing.T, api service.PostalApi, trackingNumber string) service.PostalApiResponse {
+func loadGoldenOrFetch(t *testing.T, api service.PostalAPI, trackingNumber string) service.PostalApiResponse {
 	// if UPDATE_TESTDATA in env or file is missing, fetch from API and save to file
 	// otherwise, load from file and respond
 	// both response and error are supported, so golden file is binary-serialized

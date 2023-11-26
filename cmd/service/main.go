@@ -43,11 +43,11 @@ func main() {
 	db := sqlx.MustOpen("sqlite3", dbPath)
 	storage := sqlite_storage.NewStorage(db)
 
-	apiMap := map[string]service.PostalApi{
-		"cainiao": cainiao.New(),
+	apiMap := map[service.APIName]service.PostalAPI{
+		cainiao.APIName: cainiao.New(),
 	}
 
-	service := service.NewService(
+	svc := service.NewService(
 		apiMap,
 		storage,
 		okCheckInterval,
@@ -59,12 +59,12 @@ func main() {
 		time.Now,
 	)
 
-	httpServer := parcels_api.NewServer(service, logger)
+	httpServer := parcels_api.NewServer(svc, logger)
 	listener, err := net.Listen("tcp", bindAddr)
 	if err != nil {
 		panic(err)
 	}
 	logger.Info("listening", zap.String("addr", listener.Addr().String()))
 	err = http.Serve(listener, httpServer.GetMux())
-	logger.Info("service terminated", zap.Error(err))
+	logger.Info("svc terminated", zap.Error(err))
 }

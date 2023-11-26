@@ -32,7 +32,7 @@ func TestStorage(t *testing.T) {
 		rawResp := &service.PostalApiResponse{
 			ID:             0,
 			TrackingNumber: "some-tracking-number",
-			ApiName:        "some-api-name",
+			APIName:        "some-api-name",
 			FirstFetchedAt: time.Unix(1000, 0),
 			LastFetchedAt:  time.Unix(2000, 0),
 			ResponseBody:   []byte("some-response-body"),
@@ -43,7 +43,7 @@ func TestStorage(t *testing.T) {
 			t.Fatalf("failed to insert: %v", err)
 		}
 
-		latest, err := storage.GetLatest(context.TODO(), "some-tracking-number", []string{"some-api-name"})
+		latest, err := storage.GetLatest(context.TODO(), "some-tracking-number", []service.APIName{"some-api-name"})
 		if err != nil {
 			t.Fatalf("failed to get latest: %v", err)
 		}
@@ -57,8 +57,8 @@ func TestStorage(t *testing.T) {
 		if fetchedResp.TrackingNumber != rawResp.TrackingNumber {
 			t.Fatalf("expected tracking number to be %s, got %s", rawResp.TrackingNumber, fetchedResp.TrackingNumber)
 		}
-		if fetchedResp.ApiName != rawResp.ApiName {
-			t.Fatalf("expected api name to be %s, got %s", rawResp.ApiName, fetchedResp.ApiName)
+		if fetchedResp.APIName != rawResp.APIName {
+			t.Fatalf("expected api name to be %s, got %s", rawResp.APIName, fetchedResp.APIName)
 		}
 		if fetchedResp.FirstFetchedAt != rawResp.FirstFetchedAt {
 			t.Fatalf("expected first fetched at to be %s, got %s", rawResp.FirstFetchedAt, fetchedResp.FirstFetchedAt)
@@ -80,7 +80,7 @@ func TestStorage(t *testing.T) {
 		rawResp := &service.PostalApiResponse{
 			ID:             1,
 			TrackingNumber: "some-tracking-number",
-			ApiName:        "some-api-name",
+			APIName:        "some-api-name",
 			FirstFetchedAt: time.Unix(1000, 0),
 			LastFetchedAt:  time.Unix(2000, 0),
 			ResponseBody:   []byte("some-response-body"),
@@ -100,7 +100,7 @@ func TestStorage(t *testing.T) {
 			t.Fatalf("failed to update: %v", err)
 		}
 
-		latest, err := storage.GetLatest(context.TODO(), "some-tracking-number", []string{"some-api-name"})
+		latest, err := storage.GetLatest(context.TODO(), "some-tracking-number", []service.APIName{"some-api-name"})
 		if err != nil {
 			t.Fatalf("failed to get latest: %v", err)
 		}
@@ -114,8 +114,8 @@ func TestStorage(t *testing.T) {
 		if fetchedResp.TrackingNumber != rawResp.TrackingNumber {
 			t.Fatalf("expected tracking number to be %s, got %s", rawResp.TrackingNumber, fetchedResp.TrackingNumber)
 		}
-		if fetchedResp.ApiName != rawResp.ApiName {
-			t.Fatalf("expected api name to be %s, got %s", rawResp.ApiName, fetchedResp.ApiName)
+		if fetchedResp.APIName != rawResp.APIName {
+			t.Fatalf("expected api name to be %s, got %s", rawResp.APIName, fetchedResp.APIName)
 		}
 		if fetchedResp.FirstFetchedAt != rawResp.FirstFetchedAt {
 			t.Fatalf("expected first fetched at to be %s, got %s", rawResp.FirstFetchedAt, fetchedResp.FirstFetchedAt)
@@ -154,7 +154,7 @@ func TestStorage(t *testing.T) {
 		ttlCtx, cancel := context.WithTimeout(context.Background(), 1*time.Nanosecond)
 		defer cancel()
 
-		_, err := storage.GetLatest(ttlCtx, "some-tracking-number", []string{"some-api-name"})
+		_, err := storage.GetLatest(ttlCtx, "some-tracking-number", []service.APIName{"some-api-name"})
 		if err == nil {
 			t.Fatalf("expected error, got nil")
 		}

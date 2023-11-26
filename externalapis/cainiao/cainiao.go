@@ -12,7 +12,9 @@ import (
 	"github.com/dir01/parcels/service"
 )
 
-func New() service.PostalApi {
+const APIName service.APIName = "cainiao"
+
+func New() service.PostalAPI {
 	return &Cainiao{}
 }
 
@@ -21,7 +23,7 @@ type Cainiao struct{}
 func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) service.PostalApiResponse {
 	result := service.PostalApiResponse{
 		TrackingNumber: trackingNumber,
-		ApiName:        "cainiao",
+		APIName:        "cainiao",
 	}
 
 	url := fmt.Sprintf("https://global.cainiao.com/global/detail.json?mailNos=%s&lang=en-US", trackingNumber)
@@ -44,8 +46,8 @@ func (c *Cainiao) Fetch(ctx context.Context, trackingNumber string) service.Post
 
 	if resp.StatusCode != http.StatusOK {
 		result.Status = service.StatusUnknownError
-		if bytes, err := io.ReadAll(resp.Body); err == nil {
-			result.ResponseBody = bytes
+		if b, err := io.ReadAll(resp.Body); err == nil {
+			result.ResponseBody = b
 		}
 		return result
 	}
@@ -88,7 +90,7 @@ func (c *Cainiao) Parse(rawResponse service.PostalApiResponse) (*service.Trackin
 
 	return &service.TrackingInfo{
 		TrackingNumber:     rawResponse.TrackingNumber,
-		ApiName:            rawResponse.ApiName,
+		ApiName:            APIName,
 		OriginCountry:      m0.OriginCountry,
 		DestinationCountry: m0.DestCountry,
 		Events:             events,

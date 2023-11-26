@@ -8,82 +8,82 @@ import (
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
-	mm_parcels_service "github.com/dir01/parcels/service"
+	mm_service "github.com/dir01/parcels/service"
 	"github.com/gojuno/minimock/v3"
 )
 
-// PostalApiMock implements service.PostalApi
-type PostalApiMock struct {
+// PostalAPIMock implements service.PostalAPI
+type PostalAPIMock struct {
 	t minimock.Tester
 
-	funcFetch          func(ctx context.Context, trackingNumber string) (p1 mm_parcels_service.PostalApiResponse)
+	funcFetch          func(ctx context.Context, trackingNumber string) (p1 mm_service.PostalApiResponse)
 	inspectFuncFetch   func(ctx context.Context, trackingNumber string)
 	afterFetchCounter  uint64
 	beforeFetchCounter uint64
-	FetchMock          mPostalApiMockFetch
+	FetchMock          mPostalAPIMockFetch
 
-	funcParse          func(rawResponse mm_parcels_service.PostalApiResponse) (tp1 *mm_parcels_service.TrackingInfo, err error)
-	inspectFuncParse   func(rawResponse mm_parcels_service.PostalApiResponse)
+	funcParse          func(rawResponse mm_service.PostalApiResponse) (tp1 *mm_service.TrackingInfo, err error)
+	inspectFuncParse   func(rawResponse mm_service.PostalApiResponse)
 	afterParseCounter  uint64
 	beforeParseCounter uint64
-	ParseMock          mPostalApiMockParse
+	ParseMock          mPostalAPIMockParse
 }
 
-// NewPostalApiMock returns a mock for service.PostalApi
-func NewPostalApiMock(t minimock.Tester) *PostalApiMock {
-	m := &PostalApiMock{t: t}
+// NewPostalAPIMock returns a mock for service.PostalAPI
+func NewPostalAPIMock(t minimock.Tester) *PostalAPIMock {
+	m := &PostalAPIMock{t: t}
 	if controller, ok := t.(minimock.MockController); ok {
 		controller.RegisterMocker(m)
 	}
 
-	m.FetchMock = mPostalApiMockFetch{mock: m}
-	m.FetchMock.callArgs = []*PostalApiMockFetchParams{}
+	m.FetchMock = mPostalAPIMockFetch{mock: m}
+	m.FetchMock.callArgs = []*PostalAPIMockFetchParams{}
 
-	m.ParseMock = mPostalApiMockParse{mock: m}
-	m.ParseMock.callArgs = []*PostalApiMockParseParams{}
+	m.ParseMock = mPostalAPIMockParse{mock: m}
+	m.ParseMock.callArgs = []*PostalAPIMockParseParams{}
 
 	return m
 }
 
-type mPostalApiMockFetch struct {
-	mock               *PostalApiMock
-	defaultExpectation *PostalApiMockFetchExpectation
-	expectations       []*PostalApiMockFetchExpectation
+type mPostalAPIMockFetch struct {
+	mock               *PostalAPIMock
+	defaultExpectation *PostalAPIMockFetchExpectation
+	expectations       []*PostalAPIMockFetchExpectation
 
-	callArgs []*PostalApiMockFetchParams
+	callArgs []*PostalAPIMockFetchParams
 	mutex    sync.RWMutex
 }
 
-// PostalApiMockFetchExpectation specifies expectation struct of the PostalApi.Fetch
-type PostalApiMockFetchExpectation struct {
-	mock    *PostalApiMock
-	params  *PostalApiMockFetchParams
-	results *PostalApiMockFetchResults
+// PostalAPIMockFetchExpectation specifies expectation struct of the PostalAPI.Fetch
+type PostalAPIMockFetchExpectation struct {
+	mock    *PostalAPIMock
+	params  *PostalAPIMockFetchParams
+	results *PostalAPIMockFetchResults
 	Counter uint64
 }
 
-// PostalApiMockFetchParams contains parameters of the PostalApi.Fetch
-type PostalApiMockFetchParams struct {
+// PostalAPIMockFetchParams contains parameters of the PostalAPI.Fetch
+type PostalAPIMockFetchParams struct {
 	ctx            context.Context
 	trackingNumber string
 }
 
-// PostalApiMockFetchResults contains results of the PostalApi.Fetch
-type PostalApiMockFetchResults struct {
-	p1 mm_parcels_service.PostalApiResponse
+// PostalAPIMockFetchResults contains results of the PostalAPI.Fetch
+type PostalAPIMockFetchResults struct {
+	p1 mm_service.PostalApiResponse
 }
 
-// Expect sets up expected params for PostalApi.Fetch
-func (mmFetch *mPostalApiMockFetch) Expect(ctx context.Context, trackingNumber string) *mPostalApiMockFetch {
+// Expect sets up expected params for PostalAPI.Fetch
+func (mmFetch *mPostalAPIMockFetch) Expect(ctx context.Context, trackingNumber string) *mPostalAPIMockFetch {
 	if mmFetch.mock.funcFetch != nil {
-		mmFetch.mock.t.Fatalf("PostalApiMock.Fetch mock is already set by Set")
+		mmFetch.mock.t.Fatalf("PostalAPIMock.Fetch mock is already set by Set")
 	}
 
 	if mmFetch.defaultExpectation == nil {
-		mmFetch.defaultExpectation = &PostalApiMockFetchExpectation{}
+		mmFetch.defaultExpectation = &PostalAPIMockFetchExpectation{}
 	}
 
-	mmFetch.defaultExpectation.params = &PostalApiMockFetchParams{ctx, trackingNumber}
+	mmFetch.defaultExpectation.params = &PostalAPIMockFetchParams{ctx, trackingNumber}
 	for _, e := range mmFetch.expectations {
 		if minimock.Equal(e.params, mmFetch.defaultExpectation.params) {
 			mmFetch.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmFetch.defaultExpectation.params)
@@ -93,10 +93,10 @@ func (mmFetch *mPostalApiMockFetch) Expect(ctx context.Context, trackingNumber s
 	return mmFetch
 }
 
-// Inspect accepts an inspector function that has same arguments as the PostalApi.Fetch
-func (mmFetch *mPostalApiMockFetch) Inspect(f func(ctx context.Context, trackingNumber string)) *mPostalApiMockFetch {
+// Inspect accepts an inspector function that has same arguments as the PostalAPI.Fetch
+func (mmFetch *mPostalAPIMockFetch) Inspect(f func(ctx context.Context, trackingNumber string)) *mPostalAPIMockFetch {
 	if mmFetch.mock.inspectFuncFetch != nil {
-		mmFetch.mock.t.Fatalf("Inspect function is already set for PostalApiMock.Fetch")
+		mmFetch.mock.t.Fatalf("Inspect function is already set for PostalAPIMock.Fetch")
 	}
 
 	mmFetch.mock.inspectFuncFetch = f
@@ -104,56 +104,56 @@ func (mmFetch *mPostalApiMockFetch) Inspect(f func(ctx context.Context, tracking
 	return mmFetch
 }
 
-// Return sets up results that will be returned by PostalApi.Fetch
-func (mmFetch *mPostalApiMockFetch) Return(p1 mm_parcels_service.PostalApiResponse) *PostalApiMock {
+// Return sets up results that will be returned by PostalAPI.Fetch
+func (mmFetch *mPostalAPIMockFetch) Return(p1 mm_service.PostalApiResponse) *PostalAPIMock {
 	if mmFetch.mock.funcFetch != nil {
-		mmFetch.mock.t.Fatalf("PostalApiMock.Fetch mock is already set by Set")
+		mmFetch.mock.t.Fatalf("PostalAPIMock.Fetch mock is already set by Set")
 	}
 
 	if mmFetch.defaultExpectation == nil {
-		mmFetch.defaultExpectation = &PostalApiMockFetchExpectation{mock: mmFetch.mock}
+		mmFetch.defaultExpectation = &PostalAPIMockFetchExpectation{mock: mmFetch.mock}
 	}
-	mmFetch.defaultExpectation.results = &PostalApiMockFetchResults{p1}
+	mmFetch.defaultExpectation.results = &PostalAPIMockFetchResults{p1}
 	return mmFetch.mock
 }
 
-// Set uses given function f to mock the PostalApi.Fetch method
-func (mmFetch *mPostalApiMockFetch) Set(f func(ctx context.Context, trackingNumber string) (p1 mm_parcels_service.PostalApiResponse)) *PostalApiMock {
+// Set uses given function f to mock the PostalAPI.Fetch method
+func (mmFetch *mPostalAPIMockFetch) Set(f func(ctx context.Context, trackingNumber string) (p1 mm_service.PostalApiResponse)) *PostalAPIMock {
 	if mmFetch.defaultExpectation != nil {
-		mmFetch.mock.t.Fatalf("Default expectation is already set for the PostalApi.Fetch method")
+		mmFetch.mock.t.Fatalf("Default expectation is already set for the PostalAPI.Fetch method")
 	}
 
 	if len(mmFetch.expectations) > 0 {
-		mmFetch.mock.t.Fatalf("Some expectations are already set for the PostalApi.Fetch method")
+		mmFetch.mock.t.Fatalf("Some expectations are already set for the PostalAPI.Fetch method")
 	}
 
 	mmFetch.mock.funcFetch = f
 	return mmFetch.mock
 }
 
-// When sets expectation for the PostalApi.Fetch which will trigger the result defined by the following
+// When sets expectation for the PostalAPI.Fetch which will trigger the result defined by the following
 // Then helper
-func (mmFetch *mPostalApiMockFetch) When(ctx context.Context, trackingNumber string) *PostalApiMockFetchExpectation {
+func (mmFetch *mPostalAPIMockFetch) When(ctx context.Context, trackingNumber string) *PostalAPIMockFetchExpectation {
 	if mmFetch.mock.funcFetch != nil {
-		mmFetch.mock.t.Fatalf("PostalApiMock.Fetch mock is already set by Set")
+		mmFetch.mock.t.Fatalf("PostalAPIMock.Fetch mock is already set by Set")
 	}
 
-	expectation := &PostalApiMockFetchExpectation{
+	expectation := &PostalAPIMockFetchExpectation{
 		mock:   mmFetch.mock,
-		params: &PostalApiMockFetchParams{ctx, trackingNumber},
+		params: &PostalAPIMockFetchParams{ctx, trackingNumber},
 	}
 	mmFetch.expectations = append(mmFetch.expectations, expectation)
 	return expectation
 }
 
-// Then sets up PostalApi.Fetch return parameters for the expectation previously defined by the When method
-func (e *PostalApiMockFetchExpectation) Then(p1 mm_parcels_service.PostalApiResponse) *PostalApiMock {
-	e.results = &PostalApiMockFetchResults{p1}
+// Then sets up PostalAPI.Fetch return parameters for the expectation previously defined by the When method
+func (e *PostalAPIMockFetchExpectation) Then(p1 mm_service.PostalApiResponse) *PostalAPIMock {
+	e.results = &PostalAPIMockFetchResults{p1}
 	return e.mock
 }
 
-// Fetch implements service.PostalApi
-func (mmFetch *PostalApiMock) Fetch(ctx context.Context, trackingNumber string) (p1 mm_parcels_service.PostalApiResponse) {
+// Fetch implements service.PostalAPI
+func (mmFetch *PostalAPIMock) Fetch(ctx context.Context, trackingNumber string) (p1 mm_service.PostalApiResponse) {
 	mm_atomic.AddUint64(&mmFetch.beforeFetchCounter, 1)
 	defer mm_atomic.AddUint64(&mmFetch.afterFetchCounter, 1)
 
@@ -161,7 +161,7 @@ func (mmFetch *PostalApiMock) Fetch(ctx context.Context, trackingNumber string) 
 		mmFetch.inspectFuncFetch(ctx, trackingNumber)
 	}
 
-	mm_params := &PostalApiMockFetchParams{ctx, trackingNumber}
+	mm_params := &PostalAPIMockFetchParams{ctx, trackingNumber}
 
 	// Record call args
 	mmFetch.FetchMock.mutex.Lock()
@@ -178,40 +178,40 @@ func (mmFetch *PostalApiMock) Fetch(ctx context.Context, trackingNumber string) 
 	if mmFetch.FetchMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmFetch.FetchMock.defaultExpectation.Counter, 1)
 		mm_want := mmFetch.FetchMock.defaultExpectation.params
-		mm_got := PostalApiMockFetchParams{ctx, trackingNumber}
+		mm_got := PostalAPIMockFetchParams{ctx, trackingNumber}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmFetch.t.Errorf("PostalApiMock.Fetch got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmFetch.t.Errorf("PostalAPIMock.Fetch got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
 		mm_results := mmFetch.FetchMock.defaultExpectation.results
 		if mm_results == nil {
-			mmFetch.t.Fatal("No results are set for the PostalApiMock.Fetch")
+			mmFetch.t.Fatal("No results are set for the PostalAPIMock.Fetch")
 		}
 		return (*mm_results).p1
 	}
 	if mmFetch.funcFetch != nil {
 		return mmFetch.funcFetch(ctx, trackingNumber)
 	}
-	mmFetch.t.Fatalf("Unexpected call to PostalApiMock.Fetch. %v %v", ctx, trackingNumber)
+	mmFetch.t.Fatalf("Unexpected call to PostalAPIMock.Fetch. %v %v", ctx, trackingNumber)
 	return
 }
 
-// FetchAfterCounter returns a count of finished PostalApiMock.Fetch invocations
-func (mmFetch *PostalApiMock) FetchAfterCounter() uint64 {
+// FetchAfterCounter returns a count of finished PostalAPIMock.Fetch invocations
+func (mmFetch *PostalAPIMock) FetchAfterCounter() uint64 {
 	return mm_atomic.LoadUint64(&mmFetch.afterFetchCounter)
 }
 
-// FetchBeforeCounter returns a count of PostalApiMock.Fetch invocations
-func (mmFetch *PostalApiMock) FetchBeforeCounter() uint64 {
+// FetchBeforeCounter returns a count of PostalAPIMock.Fetch invocations
+func (mmFetch *PostalAPIMock) FetchBeforeCounter() uint64 {
 	return mm_atomic.LoadUint64(&mmFetch.beforeFetchCounter)
 }
 
-// Calls returns a list of arguments used in each call to PostalApiMock.Fetch.
+// Calls returns a list of arguments used in each call to PostalAPIMock.Fetch.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmFetch *mPostalApiMockFetch) Calls() []*PostalApiMockFetchParams {
+func (mmFetch *mPostalAPIMockFetch) Calls() []*PostalAPIMockFetchParams {
 	mmFetch.mutex.RLock()
 
-	argCopy := make([]*PostalApiMockFetchParams, len(mmFetch.callArgs))
+	argCopy := make([]*PostalAPIMockFetchParams, len(mmFetch.callArgs))
 	copy(argCopy, mmFetch.callArgs)
 
 	mmFetch.mutex.RUnlock()
@@ -221,7 +221,7 @@ func (mmFetch *mPostalApiMockFetch) Calls() []*PostalApiMockFetchParams {
 
 // MinimockFetchDone returns true if the count of the Fetch invocations corresponds
 // the number of defined expectations
-func (m *PostalApiMock) MinimockFetchDone() bool {
+func (m *PostalAPIMock) MinimockFetchDone() bool {
 	for _, e := range m.FetchMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
@@ -240,66 +240,66 @@ func (m *PostalApiMock) MinimockFetchDone() bool {
 }
 
 // MinimockFetchInspect logs each unmet expectation
-func (m *PostalApiMock) MinimockFetchInspect() {
+func (m *PostalAPIMock) MinimockFetchInspect() {
 	for _, e := range m.FetchMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to PostalApiMock.Fetch with params: %#v", *e.params)
+			m.t.Errorf("Expected call to PostalAPIMock.Fetch with params: %#v", *e.params)
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
 	if m.FetchMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterFetchCounter) < 1 {
 		if m.FetchMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to PostalApiMock.Fetch")
+			m.t.Error("Expected call to PostalAPIMock.Fetch")
 		} else {
-			m.t.Errorf("Expected call to PostalApiMock.Fetch with params: %#v", *m.FetchMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to PostalAPIMock.Fetch with params: %#v", *m.FetchMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
 	if m.funcFetch != nil && mm_atomic.LoadUint64(&m.afterFetchCounter) < 1 {
-		m.t.Error("Expected call to PostalApiMock.Fetch")
+		m.t.Error("Expected call to PostalAPIMock.Fetch")
 	}
 }
 
-type mPostalApiMockParse struct {
-	mock               *PostalApiMock
-	defaultExpectation *PostalApiMockParseExpectation
-	expectations       []*PostalApiMockParseExpectation
+type mPostalAPIMockParse struct {
+	mock               *PostalAPIMock
+	defaultExpectation *PostalAPIMockParseExpectation
+	expectations       []*PostalAPIMockParseExpectation
 
-	callArgs []*PostalApiMockParseParams
+	callArgs []*PostalAPIMockParseParams
 	mutex    sync.RWMutex
 }
 
-// PostalApiMockParseExpectation specifies expectation struct of the PostalApi.Parse
-type PostalApiMockParseExpectation struct {
-	mock    *PostalApiMock
-	params  *PostalApiMockParseParams
-	results *PostalApiMockParseResults
+// PostalAPIMockParseExpectation specifies expectation struct of the PostalAPI.Parse
+type PostalAPIMockParseExpectation struct {
+	mock    *PostalAPIMock
+	params  *PostalAPIMockParseParams
+	results *PostalAPIMockParseResults
 	Counter uint64
 }
 
-// PostalApiMockParseParams contains parameters of the PostalApi.Parse
-type PostalApiMockParseParams struct {
-	rawResponse mm_parcels_service.PostalApiResponse
+// PostalAPIMockParseParams contains parameters of the PostalAPI.Parse
+type PostalAPIMockParseParams struct {
+	rawResponse mm_service.PostalApiResponse
 }
 
-// PostalApiMockParseResults contains results of the PostalApi.Parse
-type PostalApiMockParseResults struct {
-	tp1 *mm_parcels_service.TrackingInfo
+// PostalAPIMockParseResults contains results of the PostalAPI.Parse
+type PostalAPIMockParseResults struct {
+	tp1 *mm_service.TrackingInfo
 	err error
 }
 
-// Expect sets up expected params for PostalApi.Parse
-func (mmParse *mPostalApiMockParse) Expect(rawResponse mm_parcels_service.PostalApiResponse) *mPostalApiMockParse {
+// Expect sets up expected params for PostalAPI.Parse
+func (mmParse *mPostalAPIMockParse) Expect(rawResponse mm_service.PostalApiResponse) *mPostalAPIMockParse {
 	if mmParse.mock.funcParse != nil {
-		mmParse.mock.t.Fatalf("PostalApiMock.Parse mock is already set by Set")
+		mmParse.mock.t.Fatalf("PostalAPIMock.Parse mock is already set by Set")
 	}
 
 	if mmParse.defaultExpectation == nil {
-		mmParse.defaultExpectation = &PostalApiMockParseExpectation{}
+		mmParse.defaultExpectation = &PostalAPIMockParseExpectation{}
 	}
 
-	mmParse.defaultExpectation.params = &PostalApiMockParseParams{rawResponse}
+	mmParse.defaultExpectation.params = &PostalAPIMockParseParams{rawResponse}
 	for _, e := range mmParse.expectations {
 		if minimock.Equal(e.params, mmParse.defaultExpectation.params) {
 			mmParse.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmParse.defaultExpectation.params)
@@ -309,10 +309,10 @@ func (mmParse *mPostalApiMockParse) Expect(rawResponse mm_parcels_service.Postal
 	return mmParse
 }
 
-// Inspect accepts an inspector function that has same arguments as the PostalApi.Parse
-func (mmParse *mPostalApiMockParse) Inspect(f func(rawResponse mm_parcels_service.PostalApiResponse)) *mPostalApiMockParse {
+// Inspect accepts an inspector function that has same arguments as the PostalAPI.Parse
+func (mmParse *mPostalAPIMockParse) Inspect(f func(rawResponse mm_service.PostalApiResponse)) *mPostalAPIMockParse {
 	if mmParse.mock.inspectFuncParse != nil {
-		mmParse.mock.t.Fatalf("Inspect function is already set for PostalApiMock.Parse")
+		mmParse.mock.t.Fatalf("Inspect function is already set for PostalAPIMock.Parse")
 	}
 
 	mmParse.mock.inspectFuncParse = f
@@ -320,56 +320,56 @@ func (mmParse *mPostalApiMockParse) Inspect(f func(rawResponse mm_parcels_servic
 	return mmParse
 }
 
-// Return sets up results that will be returned by PostalApi.Parse
-func (mmParse *mPostalApiMockParse) Return(tp1 *mm_parcels_service.TrackingInfo, err error) *PostalApiMock {
+// Return sets up results that will be returned by PostalAPI.Parse
+func (mmParse *mPostalAPIMockParse) Return(tp1 *mm_service.TrackingInfo, err error) *PostalAPIMock {
 	if mmParse.mock.funcParse != nil {
-		mmParse.mock.t.Fatalf("PostalApiMock.Parse mock is already set by Set")
+		mmParse.mock.t.Fatalf("PostalAPIMock.Parse mock is already set by Set")
 	}
 
 	if mmParse.defaultExpectation == nil {
-		mmParse.defaultExpectation = &PostalApiMockParseExpectation{mock: mmParse.mock}
+		mmParse.defaultExpectation = &PostalAPIMockParseExpectation{mock: mmParse.mock}
 	}
-	mmParse.defaultExpectation.results = &PostalApiMockParseResults{tp1, err}
+	mmParse.defaultExpectation.results = &PostalAPIMockParseResults{tp1, err}
 	return mmParse.mock
 }
 
-// Set uses given function f to mock the PostalApi.Parse method
-func (mmParse *mPostalApiMockParse) Set(f func(rawResponse mm_parcels_service.PostalApiResponse) (tp1 *mm_parcels_service.TrackingInfo, err error)) *PostalApiMock {
+// Set uses given function f to mock the PostalAPI.Parse method
+func (mmParse *mPostalAPIMockParse) Set(f func(rawResponse mm_service.PostalApiResponse) (tp1 *mm_service.TrackingInfo, err error)) *PostalAPIMock {
 	if mmParse.defaultExpectation != nil {
-		mmParse.mock.t.Fatalf("Default expectation is already set for the PostalApi.Parse method")
+		mmParse.mock.t.Fatalf("Default expectation is already set for the PostalAPI.Parse method")
 	}
 
 	if len(mmParse.expectations) > 0 {
-		mmParse.mock.t.Fatalf("Some expectations are already set for the PostalApi.Parse method")
+		mmParse.mock.t.Fatalf("Some expectations are already set for the PostalAPI.Parse method")
 	}
 
 	mmParse.mock.funcParse = f
 	return mmParse.mock
 }
 
-// When sets expectation for the PostalApi.Parse which will trigger the result defined by the following
+// When sets expectation for the PostalAPI.Parse which will trigger the result defined by the following
 // Then helper
-func (mmParse *mPostalApiMockParse) When(rawResponse mm_parcels_service.PostalApiResponse) *PostalApiMockParseExpectation {
+func (mmParse *mPostalAPIMockParse) When(rawResponse mm_service.PostalApiResponse) *PostalAPIMockParseExpectation {
 	if mmParse.mock.funcParse != nil {
-		mmParse.mock.t.Fatalf("PostalApiMock.Parse mock is already set by Set")
+		mmParse.mock.t.Fatalf("PostalAPIMock.Parse mock is already set by Set")
 	}
 
-	expectation := &PostalApiMockParseExpectation{
+	expectation := &PostalAPIMockParseExpectation{
 		mock:   mmParse.mock,
-		params: &PostalApiMockParseParams{rawResponse},
+		params: &PostalAPIMockParseParams{rawResponse},
 	}
 	mmParse.expectations = append(mmParse.expectations, expectation)
 	return expectation
 }
 
-// Then sets up PostalApi.Parse return parameters for the expectation previously defined by the When method
-func (e *PostalApiMockParseExpectation) Then(tp1 *mm_parcels_service.TrackingInfo, err error) *PostalApiMock {
-	e.results = &PostalApiMockParseResults{tp1, err}
+// Then sets up PostalAPI.Parse return parameters for the expectation previously defined by the When method
+func (e *PostalAPIMockParseExpectation) Then(tp1 *mm_service.TrackingInfo, err error) *PostalAPIMock {
+	e.results = &PostalAPIMockParseResults{tp1, err}
 	return e.mock
 }
 
-// Parse implements service.PostalApi
-func (mmParse *PostalApiMock) Parse(rawResponse mm_parcels_service.PostalApiResponse) (tp1 *mm_parcels_service.TrackingInfo, err error) {
+// Parse implements service.PostalAPI
+func (mmParse *PostalAPIMock) Parse(rawResponse mm_service.PostalApiResponse) (tp1 *mm_service.TrackingInfo, err error) {
 	mm_atomic.AddUint64(&mmParse.beforeParseCounter, 1)
 	defer mm_atomic.AddUint64(&mmParse.afterParseCounter, 1)
 
@@ -377,7 +377,7 @@ func (mmParse *PostalApiMock) Parse(rawResponse mm_parcels_service.PostalApiResp
 		mmParse.inspectFuncParse(rawResponse)
 	}
 
-	mm_params := &PostalApiMockParseParams{rawResponse}
+	mm_params := &PostalAPIMockParseParams{rawResponse}
 
 	// Record call args
 	mmParse.ParseMock.mutex.Lock()
@@ -394,40 +394,40 @@ func (mmParse *PostalApiMock) Parse(rawResponse mm_parcels_service.PostalApiResp
 	if mmParse.ParseMock.defaultExpectation != nil {
 		mm_atomic.AddUint64(&mmParse.ParseMock.defaultExpectation.Counter, 1)
 		mm_want := mmParse.ParseMock.defaultExpectation.params
-		mm_got := PostalApiMockParseParams{rawResponse}
+		mm_got := PostalAPIMockParseParams{rawResponse}
 		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
-			mmParse.t.Errorf("PostalApiMock.Parse got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+			mmParse.t.Errorf("PostalAPIMock.Parse got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
 		}
 
 		mm_results := mmParse.ParseMock.defaultExpectation.results
 		if mm_results == nil {
-			mmParse.t.Fatal("No results are set for the PostalApiMock.Parse")
+			mmParse.t.Fatal("No results are set for the PostalAPIMock.Parse")
 		}
 		return (*mm_results).tp1, (*mm_results).err
 	}
 	if mmParse.funcParse != nil {
 		return mmParse.funcParse(rawResponse)
 	}
-	mmParse.t.Fatalf("Unexpected call to PostalApiMock.Parse. %v", rawResponse)
+	mmParse.t.Fatalf("Unexpected call to PostalAPIMock.Parse. %v", rawResponse)
 	return
 }
 
-// ParseAfterCounter returns a count of finished PostalApiMock.Parse invocations
-func (mmParse *PostalApiMock) ParseAfterCounter() uint64 {
+// ParseAfterCounter returns a count of finished PostalAPIMock.Parse invocations
+func (mmParse *PostalAPIMock) ParseAfterCounter() uint64 {
 	return mm_atomic.LoadUint64(&mmParse.afterParseCounter)
 }
 
-// ParseBeforeCounter returns a count of PostalApiMock.Parse invocations
-func (mmParse *PostalApiMock) ParseBeforeCounter() uint64 {
+// ParseBeforeCounter returns a count of PostalAPIMock.Parse invocations
+func (mmParse *PostalAPIMock) ParseBeforeCounter() uint64 {
 	return mm_atomic.LoadUint64(&mmParse.beforeParseCounter)
 }
 
-// Calls returns a list of arguments used in each call to PostalApiMock.Parse.
+// Calls returns a list of arguments used in each call to PostalAPIMock.Parse.
 // The list is in the same order as the calls were made (i.e. recent calls have a higher index)
-func (mmParse *mPostalApiMockParse) Calls() []*PostalApiMockParseParams {
+func (mmParse *mPostalAPIMockParse) Calls() []*PostalAPIMockParseParams {
 	mmParse.mutex.RLock()
 
-	argCopy := make([]*PostalApiMockParseParams, len(mmParse.callArgs))
+	argCopy := make([]*PostalAPIMockParseParams, len(mmParse.callArgs))
 	copy(argCopy, mmParse.callArgs)
 
 	mmParse.mutex.RUnlock()
@@ -437,7 +437,7 @@ func (mmParse *mPostalApiMockParse) Calls() []*PostalApiMockParseParams {
 
 // MinimockParseDone returns true if the count of the Parse invocations corresponds
 // the number of defined expectations
-func (m *PostalApiMock) MinimockParseDone() bool {
+func (m *PostalAPIMock) MinimockParseDone() bool {
 	for _, e := range m.ParseMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
 			return false
@@ -456,29 +456,29 @@ func (m *PostalApiMock) MinimockParseDone() bool {
 }
 
 // MinimockParseInspect logs each unmet expectation
-func (m *PostalApiMock) MinimockParseInspect() {
+func (m *PostalAPIMock) MinimockParseInspect() {
 	for _, e := range m.ParseMock.expectations {
 		if mm_atomic.LoadUint64(&e.Counter) < 1 {
-			m.t.Errorf("Expected call to PostalApiMock.Parse with params: %#v", *e.params)
+			m.t.Errorf("Expected call to PostalAPIMock.Parse with params: %#v", *e.params)
 		}
 	}
 
 	// if default expectation was set then invocations count should be greater than zero
 	if m.ParseMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterParseCounter) < 1 {
 		if m.ParseMock.defaultExpectation.params == nil {
-			m.t.Error("Expected call to PostalApiMock.Parse")
+			m.t.Error("Expected call to PostalAPIMock.Parse")
 		} else {
-			m.t.Errorf("Expected call to PostalApiMock.Parse with params: %#v", *m.ParseMock.defaultExpectation.params)
+			m.t.Errorf("Expected call to PostalAPIMock.Parse with params: %#v", *m.ParseMock.defaultExpectation.params)
 		}
 	}
 	// if func was set then invocations count should be greater than zero
 	if m.funcParse != nil && mm_atomic.LoadUint64(&m.afterParseCounter) < 1 {
-		m.t.Error("Expected call to PostalApiMock.Parse")
+		m.t.Error("Expected call to PostalAPIMock.Parse")
 	}
 }
 
 // MinimockFinish checks that all mocked methods have been called the expected number of times
-func (m *PostalApiMock) MinimockFinish() {
+func (m *PostalAPIMock) MinimockFinish() {
 	if !m.minimockDone() {
 		m.MinimockFetchInspect()
 
@@ -488,7 +488,7 @@ func (m *PostalApiMock) MinimockFinish() {
 }
 
 // MinimockWait waits for all mocked methods to be called the expected number of times
-func (m *PostalApiMock) MinimockWait(timeout mm_time.Duration) {
+func (m *PostalAPIMock) MinimockWait(timeout mm_time.Duration) {
 	timeoutCh := mm_time.After(timeout)
 	for {
 		if m.minimockDone() {
@@ -503,7 +503,7 @@ func (m *PostalApiMock) MinimockWait(timeout mm_time.Duration) {
 	}
 }
 
-func (m *PostalApiMock) minimockDone() bool {
+func (m *PostalAPIMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockFetchDone() &&

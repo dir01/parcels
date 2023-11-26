@@ -12,8 +12,10 @@ import (
 	"golang.org/x/exp/maps"
 )
 
+type APIName string
+
 func NewService(
-	postalApiMap map[string]PostalApi,
+	postalApiMap map[APIName]PostalAPI,
 	storage Storage,
 	okCheckInterval time.Duration,
 	notFoundCheckInterval time.Duration,
@@ -22,8 +24,8 @@ func NewService(
 	expiryTimeout time.Duration,
 	logger *zap.Logger,
 	now func() time.Time,
-) *ServiceImpl {
-	s := &ServiceImpl{
+) *Impl {
+	s := &Impl{
 		apiMap:                    postalApiMap,
 		apiNames:                  maps.Keys(postalApiMap),
 		storage:                   storage,
@@ -43,9 +45,9 @@ type Service interface {
 	GetTrackingInfo(ctx context.Context, trackingNumber string) ([]*TrackingInfo, error)
 }
 
-type ServiceImpl struct {
-	apiMap                    map[string]PostalApi
-	apiNames                  []string
+type Impl struct {
+	apiMap                    map[APIName]PostalAPI
+	apiNames                  []APIName
 	storage                   Storage
 	okCheckInterval           time.Duration
 	notFoundCheckInterval     time.Duration
@@ -61,25 +63,30 @@ type ServiceImpl struct {
 // We store whole history of responses for further analysis.
 // However, this storage is only concerned with the last response.
 type Storage interface {
-	GetLatest(ctx context.Context, trackingNumber string, apiNames []string) ([]*PostalApiResponse, error)
-	Insert(ctx context.Context, trackingNumber string, apiName string, response *PostalApiResponse) error // signature requires trackingNumber and apiName just to add gravity to api contract
+	GetLatest(ctx context.Context, trackingNumber string, apiNames []APIName) ([]*PostalApiResponse, error)
+	Insert(ctx context.Context, trackingNumber string, apiName APIName, response *PostalApiResponse) error // signature requires trackingNumber and apiName just to add gravity to api contract
 	Update(context.Context, *PostalApiResponse) error
 }
 
-// PostalApi represents a single postal service API.
+// PostalAPI represents a single postal service API.
 // It should know 2 things:
 // 1. How to fetch raw response from the postal service's API
 // 2. How to parse raw response into TrackingInfo
-type PostalApi interface {
+type PostalAPI interface {
 	// Fetch should not return error, and response should never be nil.
 	// Any error and missing response should be indicated in PostalApiResponse.Status
 	Fetch(ctx context.Context, trackingNumber string) PostalApiResponse
 	Parse(rawResponse PostalApiResponse) (*TrackingInfo, error)
 }
 
-func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]*TrackingInfo, error) {
+func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]*TrackingInfo, error) {
 	now := svc.now()
 	storedResponsesMap, err := svc.loadRawResponsesMap(ctx, trackingNumber)
+	svc.log.Info(
+		"loaded stored responses",
+		zap.String("trackingNumber", trackingNumber),
+		zap.Int("count", len(storedResponsesMap)),
+	)
 	if err != nil {
 		return nil, zaperr.Wrap(err, "loadRawResponsesMap")
 	}
@@ -87,6 +94,10 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 	apisToHit, isParcelDelivered, parsedResponsesMap := svc.analyzeStoredResponses(storedResponsesMap)
 
 	if isParcelDelivered {
+		svc.log.Info(
+			"parcel is delivered",
+			zap.String("trackingNumber", trackingNumber),
+		)
 		return maps.Values(parsedResponsesMap), nil
 	}
 
@@ -96,7 +107,7 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 
 	// getParsedResp is a convenience function to get parsed response from the map
 	// or parse it if it's not there yet
-	getParsedResp := func(apiName string, rawResp PostalApiResponse) *TrackingInfo {
+	getParsedResp := func(apiName APIName, rawResp PostalApiResponse) *TrackingInfo {
 		if parsed, exists := parsedResponsesMap[apiName]; exists {
 			return parsed
 		} else if parsed, err := svc.parseApiResponse(rawResp); err == nil {
@@ -145,14 +156,17 @@ func (svc *ServiceImpl) GetTrackingInfo(ctx context.Context, trackingNumber stri
 
 // loadRawResponsesMap loads the last responses from all APIs,
 // and returns them as a map[apiName]response
-func (svc *ServiceImpl) loadRawResponsesMap(ctx context.Context, trackingNumber string) (map[string]*PostalApiResponse, error) {
+func (svc *Impl) loadRawResponsesMap(
+	ctx context.Context,
+	trackingNumber string,
+) (map[APIName]*PostalApiResponse, error) {
 	lastResponses, err := svc.storage.GetLatest(ctx, trackingNumber, svc.apiNames)
 	if err != nil {
 		return nil, zaperr.Wrap(err, "failed to get latest responses")
 	}
-	lastResponsesMap := make(map[string]*PostalApiResponse, len(lastResponses))
+	lastResponsesMap := make(map[APIName]*PostalApiResponse, len(lastResponses))
 	for _, resp := range lastResponses {
-		lastResponsesMap[resp.ApiName] = resp
+		lastResponsesMap[resp.APIName] = resp
 	}
 	return lastResponsesMap, nil
 }
@@ -162,16 +176,16 @@ func (svc *ServiceImpl) loadRawResponsesMap(ctx context.Context, trackingNumber 
 // - apisToHit: list of APIs that should be re-fetched for new responses
 // - isDelivered: whether the package is delivered
 // - parsedResponsesMap: result of responses parsing
-func (svc *ServiceImpl) analyzeStoredResponses(
-	lastRespMap map[string]*PostalApiResponse,
+func (svc *Impl) analyzeStoredResponses(
+	lastRespMap map[APIName]*PostalApiResponse,
 ) (
-	apisToHit []string,
+	apisToHit []APIName,
 	isParcelDelivered bool,
-	parsedResponsesMap map[string]*TrackingInfo,
+	parsedResponsesMap map[APIName]*TrackingInfo,
 ) {
-	parsedResponsesMap = make(map[string]*TrackingInfo, len(lastRespMap))
+	parsedResponsesMap = make(map[APIName]*TrackingInfo, len(lastRespMap))
 	isParcelDelivered = false
-	apiHitDecisionMap := make(map[string]bool, len(svc.apiNames))
+	apiHitDecisionMap := make(map[APIName]bool, len(svc.apiNames))
 	for _, apiName := range svc.apiNames {
 		apiHitDecisionMap[apiName] = false
 		resp := lastRespMap[apiName]
@@ -245,8 +259,12 @@ func (svc *ServiceImpl) analyzeStoredResponses(
 
 // fetchResponses fetches responses from all the APIs in parallel.
 // It does not return any errors; any errors are reflected in responses.
-func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber string, apisToHit []string) map[string]PostalApiResponse {
-	fetchedResponsesMap := make(map[string]PostalApiResponse, len(apisToHit))
+func (svc *Impl) fetchResponses(
+	ctx context.Context,
+	trackingNumber string,
+	apisToHit []APIName,
+) map[APIName]PostalApiResponse {
+	fetchedResponsesMap := make(map[APIName]PostalApiResponse, len(apisToHit))
 
 	resultsChan := make(chan PostalApiResponse, len(apisToHit))
 	wg := sync.WaitGroup{}
@@ -255,8 +273,9 @@ func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber strin
 	defer cancel()
 	for _, apiName := range apisToHit {
 		wg.Add(1)
-		go func(apiName string) {
+		go func(apiName APIName) {
 			defer wg.Done()
+
 			resp := svc.apiMap[apiName].Fetch(ttlCtx, trackingNumber)
 			resultsChan <- resp
 		}(apiName)
@@ -264,24 +283,23 @@ func (svc *ServiceImpl) fetchResponses(ctx context.Context, trackingNumber strin
 
 	wg.Wait()
 	for i := 0; i < len(apisToHit); i++ {
-		var resp PostalApiResponse
 		select {
 		case <-ttlCtx.Done(): // yes, we pass the context to the API,
 			// but can we really trust them to respect it?
 			return fetchedResponsesMap
-		case resp = <-resultsChan:
-			break // break select
+		case resp := <-resultsChan:
+			fetchedResponsesMap[resp.APIName] = resp
+			continue
 		}
-		fetchedResponsesMap[resp.ApiName] = resp
 	}
 	close(resultsChan)
 
 	return fetchedResponsesMap
 }
 
-func (svc *ServiceImpl) parseApiResponse(resp PostalApiResponse) (*TrackingInfo, error) {
+func (svc *Impl) parseApiResponse(resp PostalApiResponse) (*TrackingInfo, error) {
 	if resp.Status != StatusSuccess {
 		return nil, fmt.Errorf("not parsing a response with a non-success status")
 	}
-	return svc.apiMap[resp.ApiName].Parse(resp)
+	return svc.apiMap[resp.APIName].Parse(resp)
 }

@@ -7,19 +7,19 @@ import (
 )
 
 type DBRawPostalApiResponse struct {
-	ID             int64  `db:"id"`
-	ApiName        string `db:"api_name"`
-	TrackingNumber string `db:"tracking_number"`
-	FirstFetchedAt int64  `db:"first_fetched_at"`
-	LastFetchedAt  int64  `db:"last_fetched_at"`
-	ResponseBody   []byte `db:"response_body"`
-	Status         string `db:"status"`
+	ID             int64           `db:"id"`
+	APIName        service.APIName `db:"api_name"`
+	TrackingNumber string          `db:"tracking_number"`
+	FirstFetchedAt int64           `db:"first_fetched_at"`
+	LastFetchedAt  int64           `db:"last_fetched_at"`
+	ResponseBody   []byte          `db:"response_body"`
+	Status         string          `db:"status"`
 }
 
 func (r DBRawPostalApiResponse) ToBusinessModel() *service.PostalApiResponse {
 	return &service.PostalApiResponse{
 		ID:             r.ID,
-		ApiName:        r.ApiName,
+		APIName:        r.APIName,
 		TrackingNumber: r.TrackingNumber,
 		FirstFetchedAt: fromUnixTime(r.FirstFetchedAt),
 		LastFetchedAt:  fromUnixTime(r.LastFetchedAt),
@@ -30,7 +30,7 @@ func (r DBRawPostalApiResponse) ToBusinessModel() *service.PostalApiResponse {
 
 func (r DBRawPostalApiResponse) FromBusinessModel(rawResp *service.PostalApiResponse) *DBRawPostalApiResponse {
 	r.ID = rawResp.ID
-	r.ApiName = rawResp.ApiName
+	r.APIName = rawResp.APIName
 	r.TrackingNumber = rawResp.TrackingNumber
 	r.FirstFetchedAt = toUnixTime(rawResp.FirstFetchedAt)
 	r.LastFetchedAt = toUnixTime(rawResp.LastFetchedAt)

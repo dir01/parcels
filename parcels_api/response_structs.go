@@ -9,7 +9,7 @@ import (
 // TrackingInfo represents a single track of a parcel according to one carrier in an API response
 type TrackingInfo struct {
 	TrackingNumber string          `json:"tracking_number"`
-	ApiName        string          `json:"api_name"`
+	ApiName        service.APIName `json:"api_name"`
 	IsDelivered    bool            `json:"is_delivered"`
 	LastCheckedAt  string          `json:"last_checked_at"`
 	LastUpdatedAt  string          `json:"last_updated_at"`

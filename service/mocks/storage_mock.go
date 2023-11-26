@@ -8,7 +8,7 @@ import (
 	mm_atomic "sync/atomic"
 	mm_time "time"
 
-	mm_parcels_service "github.com/dir01/parcels/service"
+	mm_service "github.com/dir01/parcels/service"
 	"github.com/gojuno/minimock/v3"
 )
 
@@ -16,20 +16,20 @@ import (
 type StorageMock struct {
 	t minimock.Tester
 
-	funcGetLatest          func(ctx context.Context, trackingNumber string, apiNames []string) (ppa1 []*mm_parcels_service.PostalApiResponse, err error)
-	inspectFuncGetLatest   func(ctx context.Context, trackingNumber string, apiNames []string)
+	funcGetLatest          func(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName) (ppa1 []*mm_service.PostalApiResponse, err error)
+	inspectFuncGetLatest   func(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName)
 	afterGetLatestCounter  uint64
 	beforeGetLatestCounter uint64
 	GetLatestMock          mStorageMockGetLatest
 
-	funcInsert          func(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse) (err error)
-	inspectFuncInsert   func(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse)
+	funcInsert          func(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse) (err error)
+	inspectFuncInsert   func(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse)
 	afterInsertCounter  uint64
 	beforeInsertCounter uint64
 	InsertMock          mStorageMockInsert
 
-	funcUpdate          func(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse) (err error)
-	inspectFuncUpdate   func(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse)
+	funcUpdate          func(ctx context.Context, pp1 *mm_service.PostalApiResponse) (err error)
+	inspectFuncUpdate   func(ctx context.Context, pp1 *mm_service.PostalApiResponse)
 	afterUpdateCounter  uint64
 	beforeUpdateCounter uint64
 	UpdateMock          mStorageMockUpdate
@@ -75,17 +75,17 @@ type StorageMockGetLatestExpectation struct {
 type StorageMockGetLatestParams struct {
 	ctx            context.Context
 	trackingNumber string
-	apiNames       []string
+	apiNames       []mm_service.APIName
 }
 
 // StorageMockGetLatestResults contains results of the Storage.GetLatest
 type StorageMockGetLatestResults struct {
-	ppa1 []*mm_parcels_service.PostalApiResponse
+	ppa1 []*mm_service.PostalApiResponse
 	err  error
 }
 
 // Expect sets up expected params for Storage.GetLatest
-func (mmGetLatest *mStorageMockGetLatest) Expect(ctx context.Context, trackingNumber string, apiNames []string) *mStorageMockGetLatest {
+func (mmGetLatest *mStorageMockGetLatest) Expect(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName) *mStorageMockGetLatest {
 	if mmGetLatest.mock.funcGetLatest != nil {
 		mmGetLatest.mock.t.Fatalf("StorageMock.GetLatest mock is already set by Set")
 	}
@@ -105,7 +105,7 @@ func (mmGetLatest *mStorageMockGetLatest) Expect(ctx context.Context, trackingNu
 }
 
 // Inspect accepts an inspector function that has same arguments as the Storage.GetLatest
-func (mmGetLatest *mStorageMockGetLatest) Inspect(f func(ctx context.Context, trackingNumber string, apiNames []string)) *mStorageMockGetLatest {
+func (mmGetLatest *mStorageMockGetLatest) Inspect(f func(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName)) *mStorageMockGetLatest {
 	if mmGetLatest.mock.inspectFuncGetLatest != nil {
 		mmGetLatest.mock.t.Fatalf("Inspect function is already set for StorageMock.GetLatest")
 	}
@@ -116,7 +116,7 @@ func (mmGetLatest *mStorageMockGetLatest) Inspect(f func(ctx context.Context, tr
 }
 
 // Return sets up results that will be returned by Storage.GetLatest
-func (mmGetLatest *mStorageMockGetLatest) Return(ppa1 []*mm_parcels_service.PostalApiResponse, err error) *StorageMock {
+func (mmGetLatest *mStorageMockGetLatest) Return(ppa1 []*mm_service.PostalApiResponse, err error) *StorageMock {
 	if mmGetLatest.mock.funcGetLatest != nil {
 		mmGetLatest.mock.t.Fatalf("StorageMock.GetLatest mock is already set by Set")
 	}
@@ -129,7 +129,7 @@ func (mmGetLatest *mStorageMockGetLatest) Return(ppa1 []*mm_parcels_service.Post
 }
 
 // Set uses given function f to mock the Storage.GetLatest method
-func (mmGetLatest *mStorageMockGetLatest) Set(f func(ctx context.Context, trackingNumber string, apiNames []string) (ppa1 []*mm_parcels_service.PostalApiResponse, err error)) *StorageMock {
+func (mmGetLatest *mStorageMockGetLatest) Set(f func(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName) (ppa1 []*mm_service.PostalApiResponse, err error)) *StorageMock {
 	if mmGetLatest.defaultExpectation != nil {
 		mmGetLatest.mock.t.Fatalf("Default expectation is already set for the Storage.GetLatest method")
 	}
@@ -144,7 +144,7 @@ func (mmGetLatest *mStorageMockGetLatest) Set(f func(ctx context.Context, tracki
 
 // When sets expectation for the Storage.GetLatest which will trigger the result defined by the following
 // Then helper
-func (mmGetLatest *mStorageMockGetLatest) When(ctx context.Context, trackingNumber string, apiNames []string) *StorageMockGetLatestExpectation {
+func (mmGetLatest *mStorageMockGetLatest) When(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName) *StorageMockGetLatestExpectation {
 	if mmGetLatest.mock.funcGetLatest != nil {
 		mmGetLatest.mock.t.Fatalf("StorageMock.GetLatest mock is already set by Set")
 	}
@@ -158,13 +158,13 @@ func (mmGetLatest *mStorageMockGetLatest) When(ctx context.Context, trackingNumb
 }
 
 // Then sets up Storage.GetLatest return parameters for the expectation previously defined by the When method
-func (e *StorageMockGetLatestExpectation) Then(ppa1 []*mm_parcels_service.PostalApiResponse, err error) *StorageMock {
+func (e *StorageMockGetLatestExpectation) Then(ppa1 []*mm_service.PostalApiResponse, err error) *StorageMock {
 	e.results = &StorageMockGetLatestResults{ppa1, err}
 	return e.mock
 }
 
 // GetLatest implements service.Storage
-func (mmGetLatest *StorageMock) GetLatest(ctx context.Context, trackingNumber string, apiNames []string) (ppa1 []*mm_parcels_service.PostalApiResponse, err error) {
+func (mmGetLatest *StorageMock) GetLatest(ctx context.Context, trackingNumber string, apiNames []mm_service.APIName) (ppa1 []*mm_service.PostalApiResponse, err error) {
 	mm_atomic.AddUint64(&mmGetLatest.beforeGetLatestCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetLatest.afterGetLatestCounter, 1)
 
@@ -293,8 +293,8 @@ type StorageMockInsertExpectation struct {
 type StorageMockInsertParams struct {
 	ctx            context.Context
 	trackingNumber string
-	apiName        string
-	response       *mm_parcels_service.PostalApiResponse
+	apiName        mm_service.APIName
+	response       *mm_service.PostalApiResponse
 }
 
 // StorageMockInsertResults contains results of the Storage.Insert
@@ -303,7 +303,7 @@ type StorageMockInsertResults struct {
 }
 
 // Expect sets up expected params for Storage.Insert
-func (mmInsert *mStorageMockInsert) Expect(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse) *mStorageMockInsert {
+func (mmInsert *mStorageMockInsert) Expect(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse) *mStorageMockInsert {
 	if mmInsert.mock.funcInsert != nil {
 		mmInsert.mock.t.Fatalf("StorageMock.Insert mock is already set by Set")
 	}
@@ -323,7 +323,7 @@ func (mmInsert *mStorageMockInsert) Expect(ctx context.Context, trackingNumber s
 }
 
 // Inspect accepts an inspector function that has same arguments as the Storage.Insert
-func (mmInsert *mStorageMockInsert) Inspect(f func(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse)) *mStorageMockInsert {
+func (mmInsert *mStorageMockInsert) Inspect(f func(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse)) *mStorageMockInsert {
 	if mmInsert.mock.inspectFuncInsert != nil {
 		mmInsert.mock.t.Fatalf("Inspect function is already set for StorageMock.Insert")
 	}
@@ -347,7 +347,7 @@ func (mmInsert *mStorageMockInsert) Return(err error) *StorageMock {
 }
 
 // Set uses given function f to mock the Storage.Insert method
-func (mmInsert *mStorageMockInsert) Set(f func(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse) (err error)) *StorageMock {
+func (mmInsert *mStorageMockInsert) Set(f func(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse) (err error)) *StorageMock {
 	if mmInsert.defaultExpectation != nil {
 		mmInsert.mock.t.Fatalf("Default expectation is already set for the Storage.Insert method")
 	}
@@ -362,7 +362,7 @@ func (mmInsert *mStorageMockInsert) Set(f func(ctx context.Context, trackingNumb
 
 // When sets expectation for the Storage.Insert which will trigger the result defined by the following
 // Then helper
-func (mmInsert *mStorageMockInsert) When(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse) *StorageMockInsertExpectation {
+func (mmInsert *mStorageMockInsert) When(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse) *StorageMockInsertExpectation {
 	if mmInsert.mock.funcInsert != nil {
 		mmInsert.mock.t.Fatalf("StorageMock.Insert mock is already set by Set")
 	}
@@ -382,7 +382,7 @@ func (e *StorageMockInsertExpectation) Then(err error) *StorageMock {
 }
 
 // Insert implements service.Storage
-func (mmInsert *StorageMock) Insert(ctx context.Context, trackingNumber string, apiName string, response *mm_parcels_service.PostalApiResponse) (err error) {
+func (mmInsert *StorageMock) Insert(ctx context.Context, trackingNumber string, apiName mm_service.APIName, response *mm_service.PostalApiResponse) (err error) {
 	mm_atomic.AddUint64(&mmInsert.beforeInsertCounter, 1)
 	defer mm_atomic.AddUint64(&mmInsert.afterInsertCounter, 1)
 
@@ -510,7 +510,7 @@ type StorageMockUpdateExpectation struct {
 // StorageMockUpdateParams contains parameters of the Storage.Update
 type StorageMockUpdateParams struct {
 	ctx context.Context
-	pp1 *mm_parcels_service.PostalApiResponse
+	pp1 *mm_service.PostalApiResponse
 }
 
 // StorageMockUpdateResults contains results of the Storage.Update
@@ -519,7 +519,7 @@ type StorageMockUpdateResults struct {
 }
 
 // Expect sets up expected params for Storage.Update
-func (mmUpdate *mStorageMockUpdate) Expect(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse) *mStorageMockUpdate {
+func (mmUpdate *mStorageMockUpdate) Expect(ctx context.Context, pp1 *mm_service.PostalApiResponse) *mStorageMockUpdate {
 	if mmUpdate.mock.funcUpdate != nil {
 		mmUpdate.mock.t.Fatalf("StorageMock.Update mock is already set by Set")
 	}
@@ -539,7 +539,7 @@ func (mmUpdate *mStorageMockUpdate) Expect(ctx context.Context, pp1 *mm_parcels_
 }
 
 // Inspect accepts an inspector function that has same arguments as the Storage.Update
-func (mmUpdate *mStorageMockUpdate) Inspect(f func(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse)) *mStorageMockUpdate {
+func (mmUpdate *mStorageMockUpdate) Inspect(f func(ctx context.Context, pp1 *mm_service.PostalApiResponse)) *mStorageMockUpdate {
 	if mmUpdate.mock.inspectFuncUpdate != nil {
 		mmUpdate.mock.t.Fatalf("Inspect function is already set for StorageMock.Update")
 	}
@@ -563,7 +563,7 @@ func (mmUpdate *mStorageMockUpdate) Return(err error) *StorageMock {
 }
 
 // Set uses given function f to mock the Storage.Update method
-func (mmUpdate *mStorageMockUpdate) Set(f func(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse) (err error)) *StorageMock {
+func (mmUpdate *mStorageMockUpdate) Set(f func(ctx context.Context, pp1 *mm_service.PostalApiResponse) (err error)) *StorageMock {
 	if mmUpdate.defaultExpectation != nil {
 		mmUpdate.mock.t.Fatalf("Default expectation is already set for the Storage.Update method")
 	}
@@ -578,7 +578,7 @@ func (mmUpdate *mStorageMockUpdate) Set(f func(ctx context.Context, pp1 *mm_parc
 
 // When sets expectation for the Storage.Update which will trigger the result defined by the following
 // Then helper
-func (mmUpdate *mStorageMockUpdate) When(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse) *StorageMockUpdateExpectation {
+func (mmUpdate *mStorageMockUpdate) When(ctx context.Context, pp1 *mm_service.PostalApiResponse) *StorageMockUpdateExpectation {
 	if mmUpdate.mock.funcUpdate != nil {
 		mmUpdate.mock.t.Fatalf("StorageMock.Update mock is already set by Set")
 	}
@@ -598,7 +598,7 @@ func (e *StorageMockUpdateExpectation) Then(err error) *StorageMock {
 }
 
 // Update implements service.Storage
-func (mmUpdate *StorageMock) Update(ctx context.Context, pp1 *mm_parcels_service.PostalApiResponse) (err error) {
+func (mmUpdate *StorageMock) Update(ctx context.Context, pp1 *mm_service.PostalApiResponse) (err error) {
 	mm_atomic.AddUint64(&mmUpdate.beforeUpdateCounter, 1)
 	defer mm_atomic.AddUint64(&mmUpdate.afterUpdateCounter, 1)
 

@@ -8,7 +8,7 @@ import (
 // parsed and normalized representation of parcel tracking info.
 type TrackingInfo struct {
 	TrackingNumber            string
-	ApiName                   string
+	ApiName                   APIName
 	LastFetchedAt             time.Time
 	OriginCountry             string
 	DestinationCountry        string
@@ -64,7 +64,7 @@ const (
 type PostalApiResponse struct {
 	ID             int64
 	TrackingNumber string
-	ApiName        string
+	APIName        APIName
 	FirstFetchedAt time.Time
 	LastFetchedAt  time.Time
 	ResponseBody   []byte

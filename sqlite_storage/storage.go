@@ -22,17 +22,21 @@ type sqliteStorage struct {
 func (s sqliteStorage) GetLatest(
 	ctx context.Context,
 	trackingNumber string,
-	apiNames []string,
+	apiNames []service.APIName,
 ) ([]*service.PostalApiResponse, error) {
+	var apiNamesStr []string
+	for _, apiName := range apiNames {
+		apiNamesStr = append(apiNamesStr, string(apiName))
+	}
 	zapFields := []zap.Field{
 		zap.String("trackingNumber", trackingNumber),
-		zap.Strings("apiNames", apiNames),
+		zap.Strings("apiNames", apiNamesStr),
 	}
 	rows, err := s.db.QueryxContext(ctx, `
 		SELECT * FROM postal_api_responses 
 		         WHERE tracking_number = ? 
 		           AND api_name IN (?) 
-		         ORDER BY last_fetched_at DESC;`, trackingNumber, strings.Join(apiNames, ","))
+		         ORDER BY last_fetched_at DESC;`, trackingNumber, strings.Join(apiNamesStr, ","))
 	if err != nil {
 		return nil, zaperr.Wrap(err, "failed to QueryxContext", zapFields...)
 	}
@@ -56,8 +60,10 @@ func (s sqliteStorage) GetLatest(
 	return businessStructs, nil
 }
 
-func (s sqliteStorage) Insert(ctx context.Context, trackingNumber string, apiName string, response *service.PostalApiResponse) error {
+func (s sqliteStorage) Insert(ctx context.Context, trackingNumber string, apiName service.APIName, response *service.PostalApiResponse) error {
 	dbStruct := DBRawPostalApiResponse{}.FromBusinessModel(response)
+	dbStruct.TrackingNumber = trackingNumber
+	dbStruct.APIName = apiName
 	_, err := s.db.NamedExecContext(ctx, `
 		INSERT INTO postal_api_responses 
 		    (api_name, tracking_number, first_fetched_at, last_fetched_at, response_body, status)
