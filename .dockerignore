@@ -1,3 +1,8 @@
 bin/*
 .git
-
+db/.sqlite.db-litestream
+db/sqlite.db*
+.github
+.gitignore
+.env*
+README.md
