@@ -36,7 +36,7 @@ func main() {
 	expiryTimeout := 6 * 30 * 24 * time.Hour
 	// endregion
 
-	logger, err := zap.NewDevelopment()
+	logger, err := zap.NewProduction()
 	if err != nil {
 		panic(err)
 	}
