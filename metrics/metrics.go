@@ -5,11 +5,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func NewPrometheus(apiNames []service.APIName) service.Metrics {
-	apiLabels := make([]string, len(apiNames))
-	for i, name := range apiNames {
-		apiLabels[i] = string(name)
-	}
+func NewPrometheus() service.Metrics {
+	apiLabels := []string{"api_name"}
 
 	parcelDeliveredCounter := prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "parcels_parcel_delivered_total",

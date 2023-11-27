@@ -21,7 +21,7 @@ func TestService(t *testing.T) {
 		t.Fatalf("failed to create logger: %v", err)
 	}
 
-	promMetrics := metrics.NewPrometheus([]service.APIName{api1Name})
+	promMetrics := metrics.NewPrometheus()
 
 	okCheckInterval := 24 * time.Hour
 	notFoundCheckInterval := 3 * 24 * time.Hour

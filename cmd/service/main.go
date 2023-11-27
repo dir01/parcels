@@ -44,7 +44,7 @@ func main() {
 	db := sqlx.MustOpen("sqlite3", dbPath)
 	storage := sqlite_storage.NewStorage(db)
 
-	promMetrics := metrics.NewPrometheus([]service.APIName{cainiao.APIName})
+	promMetrics := metrics.NewPrometheus()
 
 	apiMap := map[service.APIName]service.PostalAPI{
 		cainiao.APIName: cainiao.New(),
