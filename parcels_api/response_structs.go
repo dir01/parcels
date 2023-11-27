@@ -25,7 +25,7 @@ type TrackingEvent struct {
 
 func (hti TrackingInfo) fromBusinessStruct(t *service.TrackingInfo) *TrackingInfo {
 	hti.TrackingNumber = t.TrackingNumber
-	hti.ApiName = t.ApiName
+	hti.ApiName = t.APIName
 	hti.IsDelivered = t.IsDelivered()
 	hti.LastCheckedAt = t.LastFetchedAt.Format(time.RFC3339)
 	maxTime := time.Time{}

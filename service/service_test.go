@@ -97,7 +97,7 @@ func TestService(t *testing.T) {
 
 		api1TrackingInfo := &service.TrackingInfo{
 			TrackingNumber: "123",
-			ApiName:        api1Name,
+			APIName:        api1Name,
 		}
 		api1.ParseMock.Expect(api1Response).Return(api1TrackingInfo, nil)
 
@@ -133,7 +133,7 @@ func TestService(t *testing.T) {
 			Return([]*service.PostalApiResponse{&storedRawResponse}, nil)
 		parsedTrackingInfo := &service.TrackingInfo{
 			TrackingNumber: "123",
-			ApiName:        api1Name,
+			APIName:        api1Name,
 		}
 		api1.ParseMock.Expect(storedRawResponse).Return(parsedTrackingInfo, nil)
 
@@ -147,7 +147,7 @@ func TestService(t *testing.T) {
 		}
 		expected := &service.TrackingInfo{
 			TrackingNumber: "123",
-			ApiName:        api1Name,
+			APIName:        api1Name,
 			LastFetchedAt:  now.Add(-(okCheckInterval / 2)),
 		}
 		if !reflect.DeepEqual(tr[0], expected) {

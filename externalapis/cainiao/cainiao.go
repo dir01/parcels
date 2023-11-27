@@ -90,7 +90,7 @@ func (c *Cainiao) Parse(rawResponse service.PostalApiResponse) (*service.Trackin
 
 	return &service.TrackingInfo{
 		TrackingNumber:     rawResponse.TrackingNumber,
-		ApiName:            APIName,
+		APIName:            APIName,
 		OriginCountry:      m0.OriginCountry,
 		DestinationCountry: m0.DestCountry,
 		Events:             events,

@@ -8,7 +8,7 @@ import (
 // parsed and normalized representation of parcel tracking info.
 type TrackingInfo struct {
 	TrackingNumber            string
-	ApiName                   APIName
+	APIName                   APIName
 	LastFetchedAt             time.Time
 	OriginCountry             string
 	DestinationCountry        string

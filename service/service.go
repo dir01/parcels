@@ -129,21 +129,22 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 
 	// getParsedResp is a convenience function to get parsed response from the map
 	// or parse it if it's not there yet
-	getParsedResp := func(apiName APIName, rawResp PostalApiResponse) *TrackingInfo {
+	getParsedResp := func(apiName APIName, rawResp PostalApiResponse) (*TrackingInfo, error) {
 		if parsed, exists := parsedResponsesMap[apiName]; exists {
-			return parsed
-		} else if parsed, err := svc.parseApiResponse(rawResp); err == nil {
-			return parsed
-		} else if err != nil {
-			svc.log.Error(
-				"failed to parse response",
-				zap.Error(err),
-				zap.String("apiName", string(apiName)),
-				zap.Int64("rawResponseID", rawResp.ID),
-			)
-			svc.metrics.APIParseError(apiName)
+			return parsed, nil
 		}
-		return nil
+		parsed, err := svc.parseApiResponse(rawResp)
+		if err == nil {
+			return parsed, nil
+		}
+		svc.log.Error(
+			"failed to parse response",
+			zap.Error(err),
+			zap.String("apiName", string(apiName)),
+			zap.Int64("rawResponseID", rawResp.ID),
+		)
+		svc.metrics.APIParseError(apiName)
+		return nil, zaperr.Wrap(err, "getParsedResp")
 	}
 
 	for _, apiName := range svc.apiNames {
@@ -153,36 +154,46 @@ func (svc *Impl) GetTrackingInfo(ctx context.Context, trackingNumber string) ([]
 		switch {
 		case stored != nil && !wasFetched:
 			// Stored response was found, but was too fresh to re-fetch, no need to update, just return it
-			if parsed := getParsedResp(apiName, *stored); parsed != nil { // we can dereference here because we know that stored != nil
+			if parsed, err := getParsedResp(apiName, *stored); err == nil && parsed != nil {
 				parsed.LastFetchedAt = stored.LastFetchedAt
 				result = append(result, parsed)
 			}
 		case stored == nil || !bytes.Equal(stored.ResponseBody, fetched.ResponseBody):
-			if stored != nil {
-				svc.metrics.FetchedChanged(apiName)
-			} else {
+			if stored == nil {
+				fetched.FirstFetchedAt = now
 				svc.metrics.FetchedFirst(apiName)
+			} else {
+				svc.metrics.FetchedChanged(apiName)
 			}
-			// Something new, store it and return it (but only if it's not an error)
-			fetched.FirstFetchedAt = now
 			fetched.LastFetchedAt = now
+
+			if fetched.Status == StatusSuccess {
+				if parsed, err := getParsedResp(apiName, fetched); err == nil && parsed != nil {
+					result = append(result, parsed)
+				} else if err != nil {
+					fetched.Status = StatusUnknownError
+					if err := svc.storage.Update(ctx, &fetched); err != nil {
+						svc.log.Error("failed to update stored response after parse error", zap.Error(err))
+					}
+				}
+			}
+
 			if err := svc.storage.Insert(ctx, trackingNumber, apiName, &fetched); err != nil {
 				// TODO: check for duplicate key error, find correct entry and update it
-			}
-			if fetched.Status == StatusSuccess {
-				if parsed := getParsedResp(apiName, fetched); parsed != nil {
-					result = append(result, parsed)
-				}
 			}
 		default: // stored != nil && stored.ResponseBody == fetched.ResponseBody
 			// We already have this response, just update the timestamp
 			svc.metrics.FetchedUnchanged(apiName)
 			stored.LastFetchedAt = now
+
+			if parsed, err := getParsedResp(apiName, *stored); err == nil && parsed != nil {
+				result = append(result, parsed)
+			} else if err != nil {
+				svc.log.Error("failed to parse stored response", zap.Error(err))
+				fetched.Status = StatusUnknownError
+			}
 			if err := svc.storage.Update(ctx, stored); err != nil {
 				svc.log.Error("failed to update stored response", zap.Error(err))
-			}
-			if parsed := getParsedResp(apiName, *stored); parsed != nil { // we can dereference here because we know that stored != nil
-				result = append(result, parsed)
 			}
 		}
 	}
