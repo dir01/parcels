@@ -6,7 +6,7 @@ require (
 	github.com/gojuno/minimock/v3 v3.1.3
 	github.com/hori-ryota/zaperr v0.0.0-20210301022522-bfd0551d7f64
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/mattn/go-sqlite3 v1.14.18
 	github.com/prometheus/client_golang v1.17.0
 	github.com/rubenv/sql-migrate v1.5.2
 	go.uber.org/zap v1.26.0
