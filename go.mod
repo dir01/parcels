@@ -1,9 +1,10 @@
 module github.com/dir01/parcels
 
 go 1.21
+toolchain go1.22.2
 
 require (
-	github.com/gojuno/minimock/v3 v3.1.3
+	github.com/gojuno/minimock/v3 v3.3.7
 	github.com/hori-ryota/zaperr v0.0.0-20210301022522-bfd0551d7f64
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/mattn/go-sqlite3 v1.14.18
